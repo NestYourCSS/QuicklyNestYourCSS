@@ -886,12 +886,6 @@ function stringifySelector(groups) {
  * @returns {{type: 'MERGE' | 'NEST' | 'REVERSE_NEST', newSelector: SelectorGroup[]} | null}
  */
 function findNestingRelationship(parentGroups, childGroups) {
-    // For simplicity and to produce the most readable output,
-    // this implementation focuses on nesting single-group selectors.
-    if (parentGroups.length > 1 || childGroups.length > 1) {
-        return null;
-    }
-
     const parentStr = stringifySelector(parentGroups);
     const childStr = stringifySelector(childGroups);
 
@@ -900,26 +894,123 @@ function findNestingRelationship(parentGroups, childGroups) {
         return { type: 'MERGE', newSelector: parentGroups };
     }
 
-    // Case 2: Standard Nesting (descendant or compound)
-    // e.g., .parent .child OR .parent:hover
-    const isDescendant = childStr.startsWith(parentStr + ' ') || childStr.startsWith(parentStr + '>') || childStr.startsWith(parentStr + '+') || childStr.startsWith(parentStr + '~');
-    const isCompound = childStr.startsWith(parentStr) && !isDescendant;
+    // For other nesting, we currently support:
+    // 1. Single parent group, one or more child groups (all nesting the same way)
+    // 2. Matching number of parent and child groups (each nesting the same way)
 
-    if (isDescendant) {
-        const newSelectorStr = childStr.substring(parentStr.length);
-        return { type: 'NEST', newSelector: parseSelector(newSelectorStr) };
-    }
-    if (isCompound) {
-        const newSelectorStr = '&' + childStr.substring(parentStr.length);
-        return { type: 'NEST', newSelector: parseSelector(newSelectorStr) };
+    const relationships = [];
+
+    for (let i = 0; i < childGroups.length; i++) {
+        const childGroup = childGroups[i];
+        let matched = false;
+
+        // Try to match against each parent group
+        // If we have same number of groups, we try to match 1-to-1 first.
+        const parentGroupCandidates = (parentGroups.length === childGroups.length) ? [parentGroups[i]] : parentGroups;
+
+        for (const parentGroup of parentGroupCandidates) {
+            const rel = findSingleGroupNestingRelationship(parentGroup, childGroup);
+            if (rel) {
+                relationships.push(rel);
+                matched = true;
+                break;
+            }
+        }
+
+        if (!matched) return null;
     }
 
-    // Case 3: Reverse Context Nesting
-    // e.g., .featured .parent
-    const reverseMatch = new RegExp(`(\\s|\\>|\\+|\\~)${parentStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
-    if (reverseMatch.test(childStr)) {
-        const newSelectorStr = childStr.replace(reverseMatch, '$1&');
-        return { type: 'REVERSE_NEST', newSelector: parseSelector(newSelectorStr) };
+    // Check if all relationships are compatible
+    const firstRel = relationships[0];
+    const firstNewSelectorStr = stringifySelector(firstRel.newSelector);
+
+    const allCompatible = relationships.every(rel =>
+        rel.type === firstRel.type &&
+        stringifySelector(rel.newSelector) === firstNewSelectorStr
+    );
+
+    if (allCompatible) {
+        return {
+            type: firstRel.type,
+            newSelector: firstRel.newSelector
+        };
+    }
+
+    // If they were not all the same, but we have a single parent and multiple child groups,
+    // we can still nest if they all nested under that same parent.
+    if (parentGroups.length === 1) {
+        const combinedNewSelector = [];
+        for (const rel of relationships) {
+            combinedNewSelector.push(...rel.newSelector);
+        }
+        return {
+            type: 'NEST',
+            newSelector: combinedNewSelector
+        };
+    }
+
+    return null;
+}
+
+/**
+ * Finds the nesting relationship between two single selector groups.
+ * @param {SelectorGroup} parentGroup
+ * @param {SelectorGroup} childGroup
+ * @returns {{type: 'NEST' | 'REVERSE_NEST', newSelector: SelectorGroup[]} | null}
+ */
+function findSingleGroupNestingRelationship(parentGroup, childGroup) {
+    const parentParts = parentGroup.parts;
+    const childParts = childGroup.parts;
+    const parentStr = parentParts.join('');
+
+    const combinators = ['>', '+', '~'];
+
+    // Descendant or Combinator Nesting
+    let isMatch = childParts.length > parentParts.length;
+    if (isMatch) {
+        for (let i = 0; i < parentParts.length; i++) {
+            if (childParts[i] !== parentParts[i]) {
+                isMatch = false;
+                break;
+            }
+        }
+    }
+
+    if (isMatch) {
+        const nextPart = childParts[parentParts.length];
+        if (nextPart === ' ' || combinators.includes(nextPart)) {
+            const newParts = childParts.slice(parentParts.length);
+            if (newParts[0] === ' ') newParts.shift();
+            return { type: 'NEST', newSelector: [{ parts: newParts, newlinesBefore: 0 }] };
+        }
+    }
+
+    // Compound Nesting
+    if (childParts[0].startsWith(parentStr) && childParts[0].length > parentStr.length) {
+        const remainder = childParts[0].substring(parentStr.length);
+        if (!/[a-zA-Z0-9_-]/.test(remainder[0])) {
+            const newParts = ['&' + remainder, ...childParts.slice(1)];
+            return { type: 'NEST', newSelector: [{ parts: newParts, newlinesBefore: 0 }] };
+        }
+    }
+
+    // Reverse Context Nesting
+    if (childParts.length > parentParts.length) {
+        let isReverseMatch = true;
+        for (let i = 0; i < parentParts.length; i++) {
+            if (childParts[childParts.length - parentParts.length + i] !== parentParts[i]) {
+                isReverseMatch = false;
+                break;
+            }
+        }
+
+        if (isReverseMatch) {
+            const prevPart = childParts[childParts.length - parentParts.length - 1];
+            if (prevPart === ' ' || combinators.includes(prevPart)) {
+                const newParts = [...childParts.slice(0, childParts.length - parentParts.length), '&'];
+                return { type: 'REVERSE_NEST', newSelector: [{ parts: newParts, newlinesBefore: 0 }] };
+            }
+        }
     }
 
     return null;
