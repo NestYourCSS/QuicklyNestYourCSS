@@ -1038,53 +1038,104 @@ export function renestCSS(ast) {
             return;
         }
         
+        const body = node.body;
+        const n = body.length;
+        const consumed = new Uint8Array(n);
         const newBody = [];
-        let nodesToProcess = [...node.body];
 
-        while (nodesToProcess.length > 0) {
-            const parentNode = nodesToProcess.shift();
+        // Build Index for the current level
+        const firstTokenMap = new Map();
+        const lastTokenMap = new Map();
+        for (let i = 0; i < n; i++) {
+            const rule = body[i];
+            if (rule.type === 'Rule') {
+                for (const group of rule.selector) {
+                    const first = group.parts[0];
+                    const last = group.parts.at(-1);
+                    if (!firstTokenMap.has(first)) firstTokenMap.set(first, []);
+                    firstTokenMap.get(first).push(i);
+                    if (!lastTokenMap.has(last)) lastTokenMap.set(last, []);
+                    lastTokenMap.get(last).push(i);
+                }
+            }
+        }
+        const sortedFirstTokens = Array.from(firstTokenMap.keys()).sort();
+
+        const candidateMarks = new Uint32Array(n);
+        let currentMark = 0;
+
+        for (let i = 0; i < n; i++) {
+            if (consumed[i]) continue;
+            const parentNode = body[i];
             
-            // Only rules can be parents for nesting.
             if (parentNode.type === 'Rule') {
                 parentNode.body = parentNode.body || [];
-                const remainingNodes = [];
 
-                for (const potentialChild of nodesToProcess) {
-                    let consumed = false;
-                    if (potentialChild.type === 'Rule') {
-                        const relationship = findNestingRelationship(parentNode.selector, potentialChild.selector);
+                currentMark++;
+                const parentSelector = parentNode.selector;
+                for (const group of parentSelector) {
+                    const first = group.parts[0];
+                    const last = group.parts.at(-1);
 
-                        if (relationship) {
-                            if (relationship.type === 'MERGE') {
-                                /* Add nesting setting to remove duplicates, or leave them as fallback - for now: leave as fallback */
+                    // Descendant and Compound Nesting: Find all child tokens starting with parent's first token
+                    let low = 0, high = sortedFirstTokens.length - 1;
+                    let start = -1;
+                    while (low <= high) {
+                        let mid = (low + high) >> 1;
+                        if (sortedFirstTokens[mid] >= first) {
+                            start = mid;
+                            high = mid - 1;
+                        } else {
+                            low = mid + 1;
+                        }
+                    }
 
-                                // Merge declarations into parent
-                                const topMostRule = potentialChild.body.find((node) => ['Rule', 'AtRule'].includes(node.type));
-                                if (parentNode.body.length > 0 && topMostRule) topMostRule.spacesAbove = 1;
-                                parentNode.body.push(...potentialChild.body);
-                                consumed = true;
-                            } else { // 'NEST' or 'REVERSE_NEST'
-                                potentialChild.selector = relationship.newSelector;
-                                parentNode.body.push(potentialChild);
-                                consumed = true;
+                    if (start !== -1) {
+                        for (let k = start; k < sortedFirstTokens.length; k++) {
+                            const token = sortedFirstTokens[k];
+                            if (!token.startsWith(first)) break;
+                            const list = firstTokenMap.get(token);
+                            for (let m = 0; m < list.length; m++) {
+                                const idx = list[m];
+                                if (idx > i) candidateMarks[idx] = currentMark;
                             }
                         }
                     }
-                    if (!consumed) {
-                        remainingNodes.push(potentialChild);
+
+                    // Reverse Context Nesting: Find all child tokens matching parent's last token
+                    const reverseList = lastTokenMap.get(last);
+                    if (reverseList) {
+                        for (let k = 0; k < reverseList.length; k++) {
+                            const idx = reverseList[k];
+                            if (idx > i) candidateMarks[idx] = currentMark;
+                        }
                     }
                 }
-                nodesToProcess = remainingNodes;
 
-                // Recurse to nest the children we just added
+                for (let j = i + 1; j < n; j++) {
+                    if (candidateMarks[j] === currentMark && !consumed[j]) {
+                        const potentialChild = body[j];
+                        const relationship = findNestingRelationship(parentSelector, potentialChild.selector);
+
+                        if (relationship) {
+                            if (relationship.type === 'MERGE') {
+                                const topMostRule = potentialChild.body.find((node) => ['Rule', 'AtRule'].includes(node.type));
+                                if (parentNode.body.length > 0 && topMostRule) topMostRule.spacesAbove = 1;
+                                parentNode.body.push(...potentialChild.body);
+                                consumed[j] = 1;
+                            } else {
+                                potentialChild.selector = relationship.newSelector;
+                                parentNode.body.push(potentialChild);
+                                consumed[j] = 1;
+                            }
+                        }
+                    }
+                }
+                // Recurse to nest rules that were just added to this parent
+                _renest(parentNode);
+            } else if (parentNode.type === 'AtRule' && parentNode.body) {
                 _renest(parentNode);
             }
-            
-            // Recurse into at-rules
-            if (parentNode.type === 'AtRule' && parentNode.body) {
-                _renest(parentNode);
-            }
-
             newBody.push(parentNode);
         }
         node.body = newBody;
