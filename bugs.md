@@ -1,5 +1,8 @@
 # All known bugs
 ## Bug #1
+### Description:
+The tool produces invalid CSS nesting when handling child combinators (`>`) or other combinators within a nested structure. Instead of correctly maintaining the relationship, it can produce broken selectors like `body > { ... }`, effectively stripping the tag name from the nested selector and attaching the combinator to the parent.
+
 ### Input:
 ```diff
 + | @media (max-aspect-ratio:1.097 / 1) {
@@ -28,6 +31,7 @@
 + | 	}
 + | }
 ```
+
 ### Output:
 ```diff
 - | @media (max-aspect-ratio:1.097 / 1) {
@@ -84,7 +88,18 @@
 + | 	}
 + | }
 ```
-## Bug #2 - Issue #2 ()
+
+### Assumed/Predicted Issue:
+The `combineSelectors` function in `scripts/converters.js` likely adds a space indiscriminately between parent and child selectors during denesting (e.g., `body` + `> div` becomes `body  > div`). Subsequently, the renesting logic in `findNestingRelationship` might be splitting these combined selectors at incorrect positions or failing to account for the combinator as part of the nested selector's identity, leading to the parent "stealing" the combinator.
+
+### Potential Solution:
+- Update `combineSelectors` to check if a child selector begins with a combinator before adding a separator space.
+- Enhance `findNestingRelationship` to properly handle combinators so that they remain with the nested child selector (e.g., `& > div`) rather than being appended to the parent.
+
+## Bug #2
+### Description:
+The tool incorrectly nests selectors that share a common string prefix, even if they are fundamentally different identifiers. For example, `ab + b` is nested under `a` as `&b + b`.
+
 ### Input:
 ```diff
 + | a {
@@ -95,6 +110,7 @@
 + |     color: red;
 + | }
 ```
+
 ### Output:
 ```diff
 - | a {
@@ -105,6 +121,7 @@
 - |     }
 - | }
 ```
+
 ### Expected Output:
 ```diff
 + | a {
@@ -115,14 +132,51 @@
 + |     color: red;
 + | }
 ```
-## Bug #3
+
+### Assumed/Predicted Issue:
+The `findNestingRelationship` function in `scripts/converters.js` uses a simple `startsWith` check on the selector strings. It doesn't verify if the match occurs at a token boundary, leading to false positives when one selector's name starts with another selector's name.
+
+### Potential Solution:
+Implement a more robust check in `findNestingRelationship` that ensures the character immediately following the match in the child selector is a valid separator (like a space, combinator, or pseudo-class/element colon) or that the match represents the entirety of a selector part.
+
+## Bug #3 - Selector Lists
+### Description:
+The tool fails to nest rules that use selector lists (comma-separated selectors), even when they share a common parent structure.
+
 ### Input:
 ```diff
-
++ | .a, .b {
++ |     color: red;
++ | }
++ | .a .c, .b .c {
++ |     color: blue;
++ | }
 ```
+
 ### Output:
 ```diff
+- | .a, .b {
+- |     color: red;
+- | }
+- |
+- | .a .c, .b .c {
+- |     color: blue;
+- | }
 ```
+
 ### Expected Output:
 ```diff
++ | .a, .b {
++ |     color: red;
++ |
++ |     .c {
++ |         color: blue;
++ |     }
++ | }
 ```
+
+### Assumed/Predicted Issue:
+The `findNestingRelationship` function explicitly returns `null` if either the parent or child selector contains more than one selector group. This is a hard-coded limitation that prevents any nesting for selector lists.
+
+### Potential Solution:
+Extend `findNestingRelationship` to handle selector lists. This could involve checking if all selectors in the child list can be nested under the parent list using a common pattern, or potentially using the `:is()` pseudo-class to group parents or children when they don't have a 1-to-1 matching relationship.
