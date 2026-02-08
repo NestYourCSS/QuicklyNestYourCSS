@@ -876,7 +876,12 @@ export function denestCSS(ast) {
  * @returns {string}
  */
 function stringifySelector(groups) {
-    return groups.map(g => g.parts.join('')).join(',');
+    if (groups._str) return groups._str;
+    groups._str = groups.map(g => {
+        if (!g._str) g._str = g.parts.join('');
+        return g._str;
+    }).join(',');
+    return groups._str;
 }
 
 /**
@@ -961,7 +966,8 @@ function findNestingRelationship(parentGroups, childGroups) {
 function findSingleGroupNestingRelationship(parentGroup, childGroup) {
     const parentParts = parentGroup.parts;
     const childParts = childGroup.parts;
-    const parentStr = parentParts.join('');
+    if (!parentGroup._str) parentGroup._str = parentParts.join('');
+    const parentStr = parentGroup._str;
 
     const combinators = ['>', '+', '~'];
 
@@ -1055,9 +1061,8 @@ export function renestCSS(ast) {
                                 parentNode.body.push(...potentialChild.body);
                                 consumed = true;
                             } else { // 'NEST' or 'REVERSE_NEST'
-                                const nestedChild = cloneASTNode(potentialChild);
-                                nestedChild.selector = relationship.newSelector;
-                                parentNode.body.push(nestedChild);
+                                potentialChild.selector = relationship.newSelector;
+                                parentNode.body.push(potentialChild);
                                 consumed = true;
                             }
                         }
@@ -1082,7 +1087,6 @@ export function renestCSS(ast) {
         node.body = newBody;
     }
 
-    const nestedAST = cloneASTNode(ast);
-    _renest(nestedAST);
-    return nestedAST;
+    _renest(ast);
+    return ast;
 }
