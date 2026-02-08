@@ -902,56 +902,59 @@ function findNestingRelationship(parentGroups, childGroups) {
     // For other nesting, we currently support:
     // 1. Single parent group, one or more child groups (all nesting the same way)
     // 2. Matching number of parent and child groups (each nesting the same way)
+    // 3. One child group matching ALL parent groups (nesting under a list)
 
-    const relationships = [];
+    // Case: Parent is a list, Child is a single selector
+    if (parentGroups.length > 1 && childGroups.length === 1) {
+        const childGroup = childGroups[0];
+        const firstRel = findSingleGroupNestingRelationship(parentGroups[0], childGroup);
+        if (!firstRel) return null;
 
-    for (let i = 0; i < childGroups.length; i++) {
-        const childGroup = childGroups[i];
-        let matched = false;
+        const firstRelStr = stringifySelector(firstRel.newSelector);
 
-        // Try to match against each parent group
-        // If we have same number of groups, we try to match 1-to-1 first.
-        const parentGroupCandidates = (parentGroups.length === childGroups.length) ? [parentGroups[i]] : parentGroups;
-
-        for (const parentGroup of parentGroupCandidates) {
-            const rel = findSingleGroupNestingRelationship(parentGroup, childGroup);
-            if (rel) {
-                relationships.push(rel);
-                matched = true;
-                break;
+        for (let i = 1; i < parentGroups.length; i++) {
+            const rel = findSingleGroupNestingRelationship(parentGroups[i], childGroup);
+            if (!rel || rel.type !== firstRel.type || stringifySelector(rel.newSelector) !== firstRelStr) {
+                return null;
             }
         }
-
-        if (!matched) return null;
+        return firstRel;
     }
 
-    // Check if all relationships are compatible
-    const firstRel = relationships[0];
-    const firstNewSelectorStr = stringifySelector(firstRel.newSelector);
-
-    const allCompatible = relationships.every(rel =>
-        rel.type === firstRel.type &&
-        stringifySelector(rel.newSelector) === firstNewSelectorStr
-    );
-
-    if (allCompatible) {
-        return {
-            type: firstRel.type,
-            newSelector: firstRel.newSelector
-        };
-    }
-
-    // If they were not all the same, but we have a single parent and multiple child groups,
-    // we can still nest if they all nested under that same parent.
-    if (parentGroups.length === 1) {
-        const combinedNewSelector = [];
-        for (const rel of relationships) {
-            combinedNewSelector.push(...rel.newSelector);
+    // Case: Lists of same length (1-to-1 match)
+    if (parentGroups.length === childGroups.length) {
+        const relationships = [];
+        for (let i = 0; i < childGroups.length; i++) {
+            const rel = findSingleGroupNestingRelationship(parentGroups[i], childGroups[i]);
+            if (!rel) return null;
+            relationships.push(rel);
         }
-        return {
-            type: 'NEST',
-            newSelector: combinedNewSelector
-        };
+
+        const firstRel = relationships[0];
+        const firstRelStr = stringifySelector(firstRel.newSelector);
+        if (relationships.every(rel => rel.type === firstRel.type && stringifySelector(rel.newSelector) === firstRelStr)) {
+            return firstRel;
+        }
+        return null;
+    }
+
+    // Case: Single parent, multiple child groups
+    if (parentGroups.length === 1) {
+        const parentGroup = parentGroups[0];
+        const relationships = [];
+        for (const childGroup of childGroups) {
+            const rel = findSingleGroupNestingRelationship(parentGroup, childGroup);
+            if (!rel) return null;
+            relationships.push(rel);
+        }
+
+        const firstRel = relationships[0];
+        if (relationships.every(rel => rel.type === firstRel.type)) {
+            return {
+                type: firstRel.type,
+                newSelector: relationships.flatMap(rel => rel.newSelector)
+            };
+        }
     }
 
     return null;
