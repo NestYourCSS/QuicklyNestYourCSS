@@ -180,3 +180,75 @@ The `findNestingRelationship` function explicitly returns `null` if either the p
 
 ### Potential Solution:
 Extend `findNestingRelationship` to handle selector lists. This could involve checking if all selectors in the child list can be nested under the parent list using a common pattern, or potentially using the `:is()` pseudo-class to group parents or children when they don't have a 1-to-1 matching relationship.
+
+## Bug #4 - Performance Crash with Large CSS
+### Description:
+Processing large amounts of CSS (e.g., 4000+ lines or many rules) can cause the browser tab to freeze or crash. This is especially prevalent in Firefox.
+
+### Symptoms:
+- UI becomes unresponsive for several seconds when pasting or editing large CSS files.
+- "Page unresponsive" dialogs or total tab crashes.
+
+### Technical Analysis:
+The primary bottleneck is the `renestCSS` function, which has a worst-case O(N^2) complexity where N is the number of rules. For each rule, it checks every subsequent rule for a nesting relationship. Inside this loop:
+1.  Selectors were being stringified repeatedly (arrays joined and mapped) for comparison.
+2.  Rules were being deep-cloned using `JSON.parse(JSON.stringify())` every time a nesting relationship was found, leading to massive memory allocations and CPU overhead, especially for rules with many declarations.
+
+### Solution:
+1.  **Selector Caching:** Cache the string representation of selectors within the `SelectorGroup` objects to avoid redundant string operations.
+2.  **In-place Modification:** Since `renestCSS` operates on a fresh AST produced by `parseCSS`, it can safely modify the AST in-place instead of cloning rules during movement.
+3.  **Eliminate redundant clones:** Removed the top-level AST clone and per-rule clones within the nesting loop.
+
+## Bug #5 - Incorrect Multi-Selector Nesting
+### Description:
+The tool incorrectly nests a child rule under a parent rule with multiple selectors if the child matches only *one* of the parent's selectors. This results in the child rule being applied to all parent selectors in the output, which changes the CSS logic.
+
+### Input:
+```css
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+.ui.ordered.steps .step > * {
+  display: block;
+  align-self: center;
+}
+```
+
+### Output:
+```css
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+
+	.ui.ordered.steps .step > & {
+		display: block;
+		align-self: center;
+	}
+}
+```
+
+### Expected Output:
+```css
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+.ui.ordered.steps .step > * {
+  display: block;
+  align-self: center;
+}
+```
+
+### Assumed/Predicted Issue:
+The `findNestingRelationship` function iterates through child selectors and finds a match with *any* parent selector. If a match is found for a child selector with at least one parent selector, it proceeds with nesting, ignoring that other selectors in the parent list might not match.
+
+### Potential Solution:
+Modify `findNestingRelationship` to ensure that if a parent rule has multiple selectors, a child rule must either:
+1. Match all parent selectors in the same way (to be represented by a single `&`).
+2. Be a list of the same length as the parent list, where each child selector matches its corresponding parent selector.
