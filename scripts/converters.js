@@ -1128,6 +1128,10 @@ export function renestCSS(ast) {
                         const relationship = findNestingRelationship(parentSelector, potentialChild.selector);
 
                         if (relationship) {
+                            // Only allow MERGE if j > i to avoid cyclic merges and ensure consistency.
+                            // For NEST/REVERSE_NEST, cycles are impossible due to length/prefix constraints.
+                            if (relationship.type === 'MERGE' && j < i) continue;
+
                             parentOf[j] = i;
                             rels[j] = relationship;
                         }
