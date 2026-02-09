@@ -320,7 +320,7 @@ export function parseCSS(cssString) {
         const segment = segmentBuilder.trim();
 
         const declarationSpacesAbove = Math.max(0, Math.min(spacesAbove, 1));
-        if (typeof lastNode === 'undefined') spacesAbove = 0;
+        if (typeof lastNode === 'undefined') spacesAbove = Math.max(-1, Math.min(spacesAbove, 1));
         else if (['Rule', 'AtRule'].includes(lastNode?.type)) spacesAbove = 1;
         else spacesAbove = Math.max(0, Math.min(spacesAbove, 1));
 
@@ -875,7 +875,7 @@ export function denestCSS(ast) {
  * @param {SelectorGroup[]} groups 
  * @returns {string}
  */
-function stringifySelector(groups) {
+export function stringifySelector(groups) {
     if (groups._str) return groups._str;
     groups._str = groups.map(g => {
         if (!g._str) g._str = g.parts.join('');
@@ -890,7 +890,7 @@ function stringifySelector(groups) {
  * @param {SelectorGroup[]} childGroups 
  * @returns {{type: 'MERGE' | 'NEST' | 'REVERSE_NEST', newSelector: SelectorGroup[]} | null}
  */
-function findNestingRelationship(parentGroups, childGroups) {
+export function findNestingRelationship(parentGroups, childGroups) {
     const parentStr = stringifySelector(parentGroups);
     const childStr = stringifySelector(childGroups);
 
@@ -995,11 +995,24 @@ function findSingleGroupNestingRelationship(parentGroup, childGroup) {
     }
 
     // Compound Nesting
-    if (childParts[0].startsWith(parentStr) && childParts[0].length > parentStr.length) {
-        const remainder = childParts[0].substring(parentStr.length);
-        if (!/[a-zA-Z0-9_-]/.test(remainder[0])) {
-            const newParts = ['&' + remainder, ...childParts.slice(1)];
-            return { type: 'NEST', newSelector: [{ parts: newParts, newlinesBefore: 0 }] };
+    let isCompoundMatch = childParts.length >= parentParts.length;
+    if (isCompoundMatch) {
+        for (let i = 0; i < parentParts.length - 1; i++) {
+            if (childParts[i] !== parentParts[i]) {
+                isCompoundMatch = false;
+                break;
+            }
+        }
+    }
+    if (isCompoundMatch) {
+        const lastParentPart = parentParts.at(-1);
+        const correspondingChildPart = childParts[parentParts.length - 1];
+        if (correspondingChildPart.startsWith(lastParentPart) && correspondingChildPart.length > lastParentPart.length) {
+            const remainder = correspondingChildPart.substring(lastParentPart.length);
+            if (!/[a-zA-Z0-9_-]/.test(remainder[0])) {
+                const newParts = ['&' + remainder, ...childParts.slice(parentParts.length)];
+                return { type: 'NEST', newSelector: [{ parts: newParts, newlinesBefore: 0 }] };
+            }
         }
     }
 
@@ -1040,8 +1053,8 @@ export function renestCSS(ast) {
         
         const body = node.body;
         const n = body.length;
-        const consumed = new Uint8Array(n);
-        const newBody = [];
+        const parentOf = new Int32Array(n).fill(-1);
+        const rels = new Array(n);
 
         // Build Index for the current level
         const firstTokenMap = new Map();
@@ -1065,12 +1078,9 @@ export function renestCSS(ast) {
         let currentMark = 0;
 
         for (let i = 0; i < n; i++) {
-            if (consumed[i]) continue;
             const parentNode = body[i];
             
             if (parentNode.type === 'Rule') {
-                parentNode.body = parentNode.body || [];
-
                 currentMark++;
                 const parentSelector = parentNode.selector;
                 for (const group of parentSelector) {
@@ -1097,7 +1107,7 @@ export function renestCSS(ast) {
                             const list = firstTokenMap.get(token);
                             for (let m = 0; m < list.length; m++) {
                                 const idx = list[m];
-                                if (idx > i) candidateMarks[idx] = currentMark;
+                                if (idx !== i) candidateMarks[idx] = currentMark;
                             }
                         }
                     }
@@ -1107,38 +1117,57 @@ export function renestCSS(ast) {
                     if (reverseList) {
                         for (let k = 0; k < reverseList.length; k++) {
                             const idx = reverseList[k];
-                            if (idx > i) candidateMarks[idx] = currentMark;
+                            if (idx !== i) candidateMarks[idx] = currentMark;
                         }
                     }
                 }
 
-                for (let j = i + 1; j < n; j++) {
-                    if (candidateMarks[j] === currentMark && !consumed[j]) {
+                for (let j = 0; j < n; j++) {
+                    if (j !== i && candidateMarks[j] === currentMark && parentOf[j] === -1) {
                         const potentialChild = body[j];
                         const relationship = findNestingRelationship(parentSelector, potentialChild.selector);
 
                         if (relationship) {
-                            if (relationship.type === 'MERGE') {
-                                const topMostRule = potentialChild.body.find((node) => ['Rule', 'AtRule'].includes(node.type));
-                                if (parentNode.body.length > 0 && topMostRule) topMostRule.spacesAbove = 1;
-                                parentNode.body.push(...potentialChild.body);
-                                consumed[j] = 1;
-                            } else {
-                                potentialChild.selector = relationship.newSelector;
-                                parentNode.body.push(potentialChild);
-                                consumed[j] = 1;
-                            }
+                            // Only allow MERGE if j > i to avoid cyclic merges and ensure consistency.
+                            // For NEST/REVERSE_NEST, cycles are impossible due to length/prefix constraints.
+                            if (relationship.type === 'MERGE' && j < i) continue;
+
+                            parentOf[j] = i;
+                            rels[j] = relationship;
                         }
                     }
                 }
-                // Recurse to nest rules that were just added to this parent
-                _renest(parentNode);
-            } else if (parentNode.type === 'AtRule' && parentNode.body) {
-                _renest(parentNode);
             }
-            newBody.push(parentNode);
+        }
+
+        const newBody = [];
+        for (let i = 0; i < n; i++) {
+            if (parentOf[i] === -1) {
+                newBody.push(body[i]);
+            } else {
+                const parentIdx = parentOf[i];
+                const parentNode = body[parentIdx];
+                const childNode = body[i];
+                const rel = rels[i];
+
+                parentNode.body = parentNode.body || [];
+                if (rel.type === 'MERGE') {
+                    const topMostRule = childNode.body.find((node) => ['Rule', 'AtRule'].includes(node.type));
+                    if (parentNode.body.length > 0 && topMostRule) topMostRule.spacesAbove = 1;
+                    parentNode.body.push(...childNode.body);
+                } else {
+                    childNode.selector = rel.newSelector;
+                    parentNode.body.push(childNode);
+                }
+            }
         }
         node.body = newBody;
+
+        for (const childNode of node.body) {
+            if (childNode.type === 'Rule' || (childNode.type === 'AtRule' && childNode.body)) {
+                _renest(childNode);
+            }
+        }
     }
 
     _renest(ast);
