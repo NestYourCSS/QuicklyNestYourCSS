@@ -252,3 +252,66 @@ The `findNestingRelationship` function iterates through child selectors and find
 Modify `findNestingRelationship` to ensure that if a parent rule has multiple selectors, a child rule must either:
 1. Match all parent selectors in the same way (to be represented by a single `&`).
 2. Be a list of the same length as the parent list, where each child selector matches its corresponding parent selector.
+
+## Bug #6 - Missed Nesting for Out-of-Order Rules
+### Description:
+The nesting engine fails to nest rules if the potential parent rule appears after the potential child rule in the source CSS. This leads to many missed nesting opportunities in large frameworks like Semantic UI where base classes and their variations are often defined in separate sections.
+
+### Technical Analysis:
+The `renestCSS` function utilized a single forward-only pass. For each rule at index `i`, it only looked at rules at index `j > i` as potential children. If a child rule appeared at index `j < i`, it would never be nested under its parent at index `i`.
+
+### Solution:
+Updated `renestCSS` to perform a two-pass approach. The first pass identifies nesting relationships between ALL rules (regardless of their relative order) and builds a `parentOf` map. The second pass reconstructs the AST based on this map, effectively moving rules into their parents.
+
+## Bug #7 - Compound Selector Nesting failure for Multi-part Parents
+### Description:
+The tool fails to nest compound selectors (e.g., `.a.b`) under their parents if the parent selector consists of multiple parts (e.g., `.parent .a`).
+
+### Input:
+```css
+.ui .buttons {
+    display: block;
+}
+.ui .buttons.vertical {
+    display: flex;
+}
+```
+
+### Output:
+```css
+.ui .buttons {
+	display: block;
+}
+
+.ui .buttons.vertical {
+	display: flex;
+}
+```
+
+### Expected Output:
+```css
+.ui .buttons {
+	display: block;
+
+	&.vertical {
+		display: flex;
+	}
+}
+```
+
+### Technical Analysis:
+The `findSingleGroupNestingRelationship` function only checked if the entire parent selector string was a prefix of the first part of the child selector. This failed whenever the parent had multiple parts (spaces or combinators) because child parts are tokenized.
+
+### Solution:
+Updated the compound nesting logic to verify that all parts of the parent except the last one match the beginning of the child exactly, and the last part of the parent is a prefix of the corresponding child part.
+
+## Bug #8 - Idempotency Issue with Comments and Block Starts
+### Description:
+Subsequent passes of the nesting tool can add redundant newlines before comments that follow rules, or remove desired newlines at the start of blocks.
+
+### Technical Analysis:
+1. `parseCSS` forced `spacesAbove` to `1` for any node following a `Rule` or `AtRule`, regardless of the actual whitespace in the source.
+2. `parseCSS` forced `spacesAbove` to `0` for the first node in any block, losing any extra newlines (empty lines) that might have been present.
+
+### Solution:
+Adjusted `parseCSS` to respect the detected `spacesAbove` more faithfully, using clamping instead of forcing specific values for block starts and nodes following rules.
