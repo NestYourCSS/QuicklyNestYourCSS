@@ -22,52 +22,78 @@
   <button id="settings-toggle">⚙️</button>
   <div id="settings-popover" class="hidden">
     <div class="settings-section">
-      <h4>Functionality</h4>
-      <div class="setting-item">
-        <label for="setting-mode">Mode</label>
-        <select id="setting-mode">
-          <option value="3">Nest</option>
-          <option value="2">Denest</option>
-          <option value="1">Beautify</option>
-          <option value="0">Minify</option>
-        </select>
+      <h4 class="section-title">Editor</h4>
+      <div class="setting-row">
+        <span class="setting-label">Font</span>
+        <div class="setting-controls">
+          <select id="setting-font" class="custom-select">
+            <option value="'Fira Code', monospace">Fira Code</option>
+            <option value="'Poppins', sans-serif">Poppins</option>
+          </select>
+          <select id="setting-fontsize" class="custom-select small">
+            <option value="12">0.75rem</option>
+            <option value="14">0.875rem</option>
+            <option value="16" selected>1rem</option>
+            <option value="20">1.25rem</option>
+            <option value="24">1.5rem</option>
+          </select>
+        </div>
       </div>
-      <div class="setting-item">
-        <label>
-          <input type="checkbox" id="setting-comments" checked> Preserve Comments
-        </label>
+      <div class="setting-row">
+        <span class="setting-label">Indentation</span>
+        <div class="setting-controls">
+          <div class="segmented-control" data-setting="indent-type">
+            <button value="space">Soft</button>
+            <button value="tab" class="active">Hard</button>
+          </div>
+          <div class="stepper-input">
+            <span class="stepper-label">Size:</span>
+            <input type="number" id="setting-indent-size" value="4" min="1" max="8">
+          </div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Word Wrap</span>
+        <div class="segmented-control wide" data-setting="word-wrap">
+          <button value="false" class="active">Off</button>
+          <button value="true">On</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Coordinates</span>
+        <div class="segmented-control wide" data-setting="coords">
+          <button value="0">None</button>
+          <button value="1">Line</button>
+          <button value="2">Col</button>
+          <button value="3" class="active">Both</button>
+        </div>
       </div>
     </div>
+
     <div class="settings-section">
-      <h4>Editor</h4>
-      <div class="setting-item">
-        <label for="setting-font">Font</label>
-        <select id="setting-font">
-          <option value="'Fira Code', monospace">Fira Code</option>
-          <option value="'Poppins', sans-serif">Poppins</option>
-        </select>
+      <h4 class="section-title">Functionality</h4>
+      <div class="setting-row">
+        <span class="setting-label">Comments?</span>
+        <div class="segmented-control wide" data-setting="comments">
+          <button value="true" class="active">Yes</button>
+          <button value="false">No</button>
+        </div>
       </div>
-      <div class="setting-item">
-        <label for="setting-size">Size</label>
-        <input type="number" id="setting-size" value="16" min="8" max="72">
+      <div class="setting-row">
+        <span class="setting-label">Mode</span>
+        <div class="segmented-control wide" data-setting="mode">
+          <button value="0">Minify</button>
+          <button value="1">Beautify</button>
+          <button value="2">Denest</button>
+          <button value="3" class="active">Nest</button>
+        </div>
       </div>
-      <div class="setting-item">
-        <label for="setting-indent">Indentation</label>
-        <select id="setting-indent">
-          <option value="	">Tabs</option>
-          <option value="  ">2 Spaces</option>
-          <option value="    ">4 Spaces</option>
-        </select>
-      </div>
-      <div class="setting-item">
-        <label>
-          <input type="checkbox" id="setting-wrap"> Word Wrap
-        </label>
-      </div>
-      <div class="setting-item">
-        <label>
-          <input type="checkbox" id="setting-coords" checked> Coordinates
-        </label>
+      <div class="setting-row">
+        <span class="setting-label">Auto</span>
+        <div class="segmented-control wide" data-setting="auto">
+          <button value="false">Off</button>
+          <button value="true" class="active">On</button>
+        </div>
       </div>
     </div>
   </div>

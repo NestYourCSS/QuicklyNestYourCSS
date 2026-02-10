@@ -45,7 +45,7 @@ h1 {
       isProcessing = true;
 
       setTimeout(() => {
-        if (codeChanged) {
+        if (codeChanged && window.autoProcess !== false) {
           nestCode();
           codeChanged = false;
         }
