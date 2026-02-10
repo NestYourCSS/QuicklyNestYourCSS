@@ -1,124 +1,156 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="./assets/logo.png" />
-  <title>Quickly Nest Your CSS</title>
-  
-  <!-- Vercel Web Analytics -->
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
-  
-  <script src="./lib/ace.min.js"></script>
-  
-  <link href="./styles/keyframes.css" rel="stylesheet">
-  <link href="./styles/editor.css" rel="stylesheet">
-  <link href="./styles/main.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="./assets/logo.png" />
+    <title>Quickly Nest Your CSS</title>
+    <script src="./lib/ace.min.js"></script>
+    <script src="./lib/ace-linters.min.js"></script>
+    <link href="./styles/main.css" rel="stylesheet">
 </head>
-<body>
-  <div id="code-editor-wrapper">
-    <div id="button-container">
-      <button id="nestBtn">Nest!</button>
-      <button id="settingsBtn">Settings</button>
+<body class="NyCSS">
+    <div id="siteWrapper">
+        <main>
+            <aside id="mainSettings">
+                <section>
+                    <h2>Functionality</h2>
+                    <ul>
+                        <li>
+                            <span id="preserveComments-label">Comments?</span>
+                            <div>
+                                <label id="preserveComments" class="checkbox">
+                                    <input type="checkbox" checked />
+                                    <span aria-hidden="true">Yes</span>
+                                    <span aria-hidden="true">No</span>
+                                </label>
+                            </div>
+                        </li>
+                        <li>
+                            <span id="mode-group-label">Mode</span>
+                            <div>
+                                <label id="mode" class="radio-group">
+                                    <label>Minify<input type="radio" name="mode" /></label>
+                                    <label>Beautify<input type="radio" name="mode" /></label>
+                                    <label>Denest<input type="radio" name="mode" /></label>
+                                    <label>Nest<input type="radio" name="mode" checked /></label>
+                                </label>
+                            </div>
+                        </li>
+                        <li>
+                            <span id="auto-label">Auto</span>
+                            <div>
+                                <label id="auto" class="checkbox">
+                                    <input type="checkbox" checked />
+                                    <span aria-hidden="true">Off</span>
+                                    <span aria-hidden="true">On</span>
+                                </label>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Editor</h2>
+                    <ul>
+                        <li>
+                            <span id="font-label">Font</span>
+                            <div>
+                                <select id="typefaces" class="custom-select" style="background: var(--component-background); border-radius: 1rem; border: none; padding: 1rem; color: inherit; flex: 1;">
+                                    <option value="'Fira Code', monospace">Fira Code</option>
+                                    <option value="'Source Code Pro', monospace">Source Code Pro</option>
+                                    <option value="monospace">Monospace</option>
+                                </select>
+                                <select id="fontsizes" class="custom-select" style="background: var(--component-background); border-radius: 1rem; border: none; padding: 1rem; color: inherit; flex: 0.5;">
+                                    <option value="12px">0.75rem</option>
+                                    <option value="16px">1rem</option>
+                                    <option value="20px" selected>1.25rem</option>
+                                </select>
+                            </div>
+                        </li>
+                        <li>
+                            <span id="indentation-label">Indentation</span>
+                            <div>
+                                <label id="indentationType" class="checkbox">
+                                    <input type="checkbox" checked />
+                                    <span aria-hidden="true">Soft</span>
+                                    <span aria-hidden="true">Hard</span>
+                                </label>
+                                <label id="indentationSize" class="number">
+                                    <span>Size:</span>
+                                    <output>
+                                        <input type="text" value="4" style="background:transparent; border:none; color:inherit; width:2ch;">
+                                        <div style="display:inline-flex; flex-direction:column; vertical-align:middle; cursor:pointer;">
+                                            <span class="up">▲</span>
+                                            <span class="down">▼</span>
+                                        </div>
+                                    </output>
+                                </label>
+                            </div>
+                        </li>
+                        <li>
+                            <span id="wrap-label">Word Wrap</span>
+                            <div>
+                                <label id="wordWrap" class="checkbox">
+                                    <input type="checkbox" />
+                                    <span aria-hidden="true">Off</span>
+                                    <span aria-hidden="true">On</span>
+                                </label>
+                            </div>
+                        </li>
+                        <li>
+                            <span id="coord-label">Coordinates</span>
+                            <div>
+                                <label id="coordinates" class="radio-group">
+                                    <label>None<input type="radio" name="coordinates" /></label>
+                                    <label>Line<input type="radio" name="coordinates" /></label>
+                                    <label>Col<input type="radio" name="coordinates" /></label>
+                                    <label>Both<input type="radio" name="coordinates" checked /></label>
+                                </label>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </aside>
+
+            <div id="mainContent">
+                <div id="editorSide">
+                    <button id="nestBtn"></button>
+                    <div id="codeEditor">
+                        <div class="editorWrapper">
+                            <div class="editorGroup">
+                                <div class="editorTab">
+                                    <div class="fileName" id="input-filename">input.css</div>
+                                    <div class="editorCoordinates" id="inputCoordinates"></div>
+                                    <div class="tabButtons">
+                                        <button class="tabCopyAll" title="Copy All"></button>
+                                    </div>
+                                </div>
+                                <div class="editor" id="inputEditor"></div>
+                            </div>
+                        </div>
+                        <div id="editorGap"></div>
+                        <div class="editorWrapper">
+                            <div class="editorGroup">
+                                <div class="editorTab">
+                                    <div class="fileName" id="output-filename">output.css</div>
+                                    <div class="editorCoordinates" id="outputCoordinates"></div>
+                                    <div class="tabButtons">
+                                        <button class="tabCopyAll" title="Copy All"></button>
+                                    </div>
+                                </div>
+                                <div class="editor" id="outputEditor"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <div id="settingsPopover" hidden>
-      <div class="settings-section">
-        <h3>Functionality</h3>
-        <ul>
-          <li>
-            <span>Mode</span>
-            <div id="mode" class="radio-group">
-              <label><input type="radio" name="mode" value="0"> Minify</label>
-              <label><input type="radio" name="mode" value="1"> Beautify</label>
-              <label><input type="radio" name="mode" value="2"> Denest</label>
-              <label><input type="radio" name="mode" value="3" checked> Nest</label>
-            </div>
-          </li>
-          <li>
-            <label for="auto">Auto Nest</label>
-            <input type="checkbox" id="auto" checked>
-          </li>
-          <li>
-            <label for="preserveComments">Preserve Comments</label>
-            <input type="checkbox" id="preserveComments" checked>
-          </li>
-          <li>
-            <span>Coordinates</span>
-            <div id="coordinates" class="radio-group">
-              <label><input type="radio" name="coordinates" value="none" checked> None</label>
-              <label><input type="radio" name="coordinates" value="line"> Line</label>
-              <label><input type="radio" name="coordinates" value="col"> Col</label>
-              <label><input type="radio" name="coordinates" value="both"> Both</label>
-            </div>
-          </li>
-        </ul>
-      </div>
-      <div class="settings-section">
-        <h3>Editor</h3>
-        <ul>
-          <li>
-            <label for="typefaces">Typeface</label>
-            <select id="typefaces">
-              <option value="Fira Code" selected>Fira Code</option>
-              <option value="DejaVu Mono">DejaVu Mono</option>
-              <option value="iA Writer Mono">iA Writer Mono</option>
-              <option value="JetBrains Mono">JetBrains Mono</option>
-              <option value="PT Mono">PT Mono</option>
-              <option value="monospace">Monospace</option>
-            </select>
-          </li>
-          <li>
-            <label for="fontsizes">Font Size</label>
-            <select id="fontsizes">
-              <option value="0.75rem">0.75rem</option>
-              <option value="1rem">1rem</option>
-              <option value="1.1rem" selected>1.1rem</option>
-              <option value="1.25rem">1.25rem</option>
-              <option value="1.5rem">1.5rem</option>
-            </select>
-          </li>
-          <li>
-            <span>Indentation</span>
-            <div class="indent-controls">
-              <div id="indentationType" class="radio-group">
-                <label><input type="radio" name="indentationType" value="soft" checked> Soft</label>
-                <label><input type="radio" name="indentationType" value="hard"> Hard</label>
-              </div>
-              <label>Size: <input type="number" id="indentationSize" value="4" min="1" max="8"></label>
-            </div>
-          </li>
-          <li>
-            <label for="wordWrap">Word Wrap</label>
-            <input type="checkbox" id="wordWrap">
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <div id="code-editor">
-      <div class="editor" id="inputEditor"></div>
-      <div class="editor" id="outputEditor"></div>
-    </div>
-  </div>
-
-  <script src="./scripts/main.js" type="text/javascript"></script>
-  <script src="./scripts/setup.js" type="text/javascript"></script>
-  <script src="./scripts/sample.js" type="text/javascript"></script>
-  <script src="./scripts/nesting.js" type="text/javascript"></script>
-  <script src="./scripts/settings.js" type="text/javascript"></script>
-  <script src="./scripts/handlers.js" type="text/javascript"></script>
-  <script src="./scripts/debugging.js" type="text/javascript"></script>
-
-  <script>(async () => Object.assign(window, await import('./scripts/converters.js')))();</script>
-  
-  <script src="./lib/mode-css.js"></script>
-  <script src="./lib/ace-linters.min.js"></script>
-  <script src="./lib/ext-searchbox.min.js"></script>
-  <!-- <script src="./scripts/ext-stickyscroll.js"></script> -->
-  <!-- <script src="./lib/ext-language_tools.min.js"></script> -->
+    <script src="./scripts/main.js" type="text/javascript"></script>
+    <script src="./scripts/setup.js" type="text/javascript"></script>
+    <script src="./scripts/settings.js" type="text/javascript"></script>
+    <script src="./scripts/nesting.js" type="text/javascript"></script>
+    <script>(async () => Object.assign(window, await import('./scripts/converters.js')))();</script>
 </body>
 </html>
