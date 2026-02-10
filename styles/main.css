@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Poppins&display=swap');
 
 :root {
-	--rem: clamp(0px, 1.5vh, 24px);
+    --rem: clamp(0px, 1.5vh, 24px);
 
     --pri-colour-darkest: #051823;
     --pri-colour-em-darker: #092533;
@@ -33,7 +33,7 @@
     --shades-lighter: #cecece;
     --shades-em-lighter: #dedede;
     --shades-lightest: #ffffff;
-    
+
     --opacity-none: 0;
     --opacity-low: 0.25;
     --opacity-medium: 0.5;
@@ -63,17 +63,13 @@ body {
 #code-editor-wrapper {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    width: 100%;
     height: 100%;
     padding: 2rem;
     gap: 2rem;
-    box-sizing: border-box;
 
     > button {
         cursor: pointer;
-        flex: 0;
         border-radius: 999px;
         font-weight: bold;
         border: none;
@@ -88,20 +84,23 @@ body {
     }
 
     > #code-editor {
-        position: relative;
-        height: 100%;
-        width: auto;
+        flex: 1;
+        max-width: 100%;
+        aspect-ratio: var(--total-width) / 7;
         --gutter-width: 0.5;
         --editor-width: 5;
         --total-width: calc(var(--gutter-width) + (2 * var(--editor-width)));
-
         display: flex;
-        justify-content: center;
         gap: calc((var(--gutter-width) / var(--total-width)) * 100%);
-			
+        
+        @media (width < 896px) {
+            display: grid;
+        }
+
         .editorGroup {
-            height: 100%;
             width: 100%;
+            display: flex;
+            flex-direction: column;
 
             &:has(button:active) {
                 --onClickValue1: 0.75;
@@ -119,6 +118,7 @@ body {
             --window-text-colour: rgb(from var(--shades-darker) r g b / var(--opacity-medium));
             line-height: 100%;
             color: rgb(from var(--shades-medium) r g b / 50%);
+            font-size: 0.5rem;
             font-family: "Fira Code", monospace;
             border: 0.25rch solid var(--window-text-colour);
             border-radius: 1rem 1rem 0 0;
@@ -127,17 +127,17 @@ body {
             display: flex;
             justify-content: space-between;
             padding: 0.75rem !important;
-        
+
             > .fileName {
-                font-size: 1rem;
+                font-size: 1em;
                 align-content: center;
             }
-        
+
             > .tabButtons {
-                font-size: 0.5rem;
+                font-size: 0.5em;
                 display: flex;
                 gap: 1em;
-        
+
                 > button {
                     font-size: inherit;
                     height: 4em;
@@ -151,24 +151,27 @@ body {
                     opacity: var(--opacity-medium);
                     cursor: pointer;
 
-                    &.tabCopyAll { background-image: url('../assets/icon-copy.svg') }
-                    &.tabOpenRaw { background-image: url('../assets/icon-open-external.svg') }
-                    &.tabInsertCSS { background-image: url('../assets/icon-add-file.svg') }
-                    &.tabDeleteAll { background-image: url('../assets/icon-erase.svg') }
+                    &.tabCopyAll {
+                        background-image: url('../assets/icon-copy.svg');
+                    }
+
+                    &.tabOpenRaw {
+                        background-image: url('../assets/icon-open-external.svg');
+                    }
+
+                    &.tabInsertCSS {
+                        background-image: url('../assets/icon-add-file.svg');
+                    }
+
+                    &.tabDeleteAll {
+                        background-image: url('../assets/icon-erase.svg');
+                    }
                 }
             }
         }
 
         .editor {
-            /*
-            height: calc(100% - (editorTab's total height)
-            height: calc(100% - (<editorTab's "padding-block"> + <height of buttons>)
-            height: calc(100% - ((2 * 0.75rem) + 2rem));
-            */
-            
-            height: calc(100% - 3.5rem);
-            width: auto;
-            aspect-ratio: var(--editor-width) / 6.625;
+            flex: 1;
         }
     }
 }
