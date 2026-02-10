@@ -88,6 +88,10 @@ h1 {
     fileName.classList.add('fileName');
     fileName.textContent = `${editorName}.css`;
 
+    const editorCoords = document.createElement("div");
+    editorCoords.classList.add('editorCoordinates');
+    editorCoords.textContent = 'Line 1, Col 1';
+
     const tabButtons = document.createElement("div");
     tabButtons.classList.add('tabButtons');
 
@@ -122,8 +126,9 @@ h1 {
 
     tabButtons.appendChild(createButton(`${editorName}TabDeleteAll`, 'tabDeleteAll', isShadowEditor));
 
-    // Add file name and buttons to the tab
+    // Add file name, coordinates and buttons to the tab
     editorTab.appendChild(fileName);
+    editorTab.appendChild(editorCoords);
     editorTab.appendChild(tabButtons);
 
     return editorTab;

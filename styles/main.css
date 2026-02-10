@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Poppins&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=JetBrains+Mono:wght@300..700&family=PT+Mono&family=Source+Code+Pro:wght@300..700&family=Poppins:wght@300..700&display=swap');
 
 :root {
     --rem: clamp(0px, 1.5vh, 24px);
@@ -56,53 +56,67 @@ html {
 
 #settings-toggle {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
+    top: 2rem;
+    right: 15rem;
     z-index: 1000;
-    background: var(--sec-colour-medium);
-    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
-    width: 3rem;
-    height: 3rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    box-shadow: 0 0 10px rgba(3, 196, 212, 0.5);
+    width: 4rem;
+    height: 4rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #settings-toggle:hover {
     transform: scale(1.1);
-    background: var(--sec-colour-lighter);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    box-shadow: 0 0 20px var(--sec-colour-medium);
+    border-color: var(--sec-colour-medium);
 }
 
 #settings-popover {
     position: fixed;
-    top: 4.5rem;
-    right: 1rem;
+    top: 7rem;
+    right: 2rem;
     z-index: 1000;
-    background: rgba(10, 10, 10, 0.98);
+    background: rgba(10, 10, 10, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 40px;
     padding: 2.5rem;
     width: clamp(320px, 90vw, 520px);
-    max-height: calc(100vh - 6rem);
+    max-height: calc(100vh - 9rem);
     overflow-y: auto;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05) inset;
     color: var(--shades-lightest);
     font-family: 'Poppins', sans-serif;
-    backdrop-filter: blur(25px);
+    backdrop-filter: blur(20px) saturate(180%);
 }
 
 #settings-popover::-webkit-scrollbar {
-    width: 6px;
+    width: 10px;
+}
+
+#settings-popover::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 #settings-popover::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    border-radius: 10px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+}
+
+#settings-popover::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .settings-section {
@@ -115,16 +129,17 @@ html {
 
 .section-title {
     margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 1.4rem;
-    font-weight: 500;
+    margin-bottom: 2rem;
+    color: white;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
 
 .setting-row {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     display: grid;
-    grid-template-columns: 130px 1fr;
+    grid-template-columns: 140px 1fr;
     align-items: center;
     gap: 1.5rem;
 }
@@ -138,7 +153,8 @@ html {
 
 .setting-label {
     font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
 }
 
 .setting-controls {
@@ -148,9 +164,9 @@ html {
 }
 
 .custom-select {
-    background: rgba(255, 255, 255, 0.03);
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
     padding: 0.8rem 1.2rem;
     border-radius: 12px;
     font-family: inherit;
@@ -170,9 +186,9 @@ html {
 
 .segmented-control {
     display: flex;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 16px;
-    padding: 4px;
+    padding: 6px;
     gap: 4px;
 }
 
@@ -210,7 +226,7 @@ html {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
     padding: 0.6rem 1rem;
     border-radius: 12px;
     color: rgba(255, 255, 255, 0.6);
@@ -242,11 +258,15 @@ html {
 body {
     font-size: clamp(8px, 1.5vh, 24px);
     margin: 0;
-    height: 100%;
-    min-height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
     background: url('../assets/nycss-bg-pattern.png') 0 0.1dvh / 5dvh repeat,
     linear-gradient(45deg, black, var(--pri-colour-em-darker)),
     #0C2430;
+}
+
+main {
+    height: 100%;
 }
 
 #code-editor-wrapper {
@@ -254,21 +274,88 @@ body {
     flex-direction: column;
     align-items: center;
     height: 100%;
-    padding: 2rem;
+    padding: 8rem 2rem 2rem 2rem;
     gap: 2rem;
 
     > button {
-        cursor: pointer;
-        border-radius: 999px;
-        font-weight: bold;
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1000;
+        padding: 0 2.5rem;
+        height: 4rem;
+        border-radius: 50px;
+        font-size: 1.8rem;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
         border: none;
-        box-shadow: inset 0 0 1em 0 var(--shades-darkest);
-        background: var(--sec-colour-lighter);
-        transition: 0.25s;
-        padding: 1em 3.25em;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-        &:hover {
-            background: var(--sec-colour-lightest);
+        /* Colorful state (Manual Mode) */
+        &.vibrant {
+            background: linear-gradient(135deg, var(--vibrant-color, var(--sec-colour-medium)), color-mix(in srgb, var(--vibrant-color, var(--sec-colour-medium)), black 20%));
+            color: white;
+            box-shadow: 0 10px 30px -10px var(--vibrant-color, var(--sec-colour-medium)), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+
+            &:hover {
+                transform: scale(1.05) translateY(-2px);
+                filter: brightness(1.1);
+                box-shadow: 0 15px 40px -10px var(--vibrant-color, var(--sec-colour-medium)), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            }
+
+            &:active {
+                transform: scale(0.98) translateY(0);
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+        }
+
+        /* Neutral state (Auto Mode) */
+        &.neutral {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+
+            &:hover:not(:disabled) {
+                transform: scale(1.05);
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                box-shadow: 0 0 20px var(--sec-colour-medium);
+                border-color: var(--sec-colour-medium);
+            }
+
+            &:disabled {
+                cursor: default;
+                opacity: 0.8;
+            }
+        }
+    }
+
+    @media (max-width: 800px) {
+        padding-top: 7rem;
+
+        #settings-toggle {
+            right: 12rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            font-size: 1.2rem;
+        }
+
+        > button {
+            right: 1rem;
+            padding: 0 1.5rem;
+            font-size: 1.4rem;
+            height: 3.5rem;
         }
     }
 
@@ -320,6 +407,15 @@ body {
             > .fileName {
                 font-size: 1em;
                 align-content: center;
+            }
+
+            .editorCoordinates {
+                font-size: 0.8em;
+                align-content: center;
+                opacity: 0.6;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                font-weight: 500;
             }
 
             > .tabButtons {

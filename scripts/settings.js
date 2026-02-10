@@ -58,7 +58,10 @@
   function applySettings() {
     window.processMode = parseInt(settings['mode']);
     window.preserveComments = settings['comments'] === 'true';
+
+    // Support both variable names as requested in review
     window.autoProcess = settings['auto'] === 'true';
+    window.processAuto = window.autoProcess;
 
     const editors = [window.inputEditor, window.outputEditor];
     if (!editors[0]) return;
@@ -66,7 +69,6 @@
     const fontSize = parseInt(settings['fontsize']);
     const fontFamily = settings['font'];
     const useWrapMode = settings['word-wrap'] === 'true';
-    const coordsMode = parseInt(settings['coords']);
     const indentType = settings['indent-type'];
     const indentSize = parseInt(settings['indent-size']);
 
@@ -83,37 +85,53 @@
 
       editor.getSession().setUseWrapMode(useWrapMode);
 
-      // Handle Gutter (Coordinates)
-      // 0: None, 1: Line, 2: Col, 3: Both
-      // Ace renderer.setShowGutter handles the line numbers
-      editor.renderer.setShowGutter(coordsMode === 1 || coordsMode === 3);
-
       // Tab settings
       editor.getSession().setTabSize(indentType === 'tab' ? 4 : indentSize);
       editor.getSession().setUseSoftTabs(indentType === 'space');
     });
 
-    // Update coordinates display if it exists in UI
     updateCoordinateDisplay();
 
-    if (window.autoProcess && window.nestCode) window.nestCode();
+    if (window.autoProcess && typeof window.nestCode === 'function') {
+        window.nestCode();
+    }
 
-    // Update Nest button style
     updateNestButton();
   }
 
   function updateCoordinateDisplay() {
     const coordsMode = parseInt(settings['coords']);
-    document.querySelectorAll('.editorCoordinates').forEach(el => {
-        // Toggle visibility based on mode
+    const editors = [window.inputEditor, window.outputEditor];
+
+    editors.forEach(editor => {
+        if (!editor) return;
+
+        // Use Ace's gutter for Line numbers if mode includes Line (1 or 3)
+        editor.renderer.setShowGutter(coordsMode === 1 || coordsMode === 3);
+
+        const tab = editor.container.parentElement.querySelector('.editorTab');
+        if (!tab) return;
+
+        const coordsEl = tab.querySelector('.editorCoordinates');
+        if (!coordsEl) return;
+
         if (coordsMode === 0) {
-            el.classList.add('hidden');
+            coordsEl.classList.add('hidden');
         } else {
-            el.classList.remove('hidden');
-            // Logic for Line vs Col would go in Ace's changeCursor event,
-            // but we can at least toggle the container here.
+            coordsEl.classList.remove('hidden');
+            updateCoordText(editor, coordsEl, coordsMode);
         }
     });
+  }
+
+  function updateCoordText(editor, el, mode) {
+    const pos = editor.getCursorPosition();
+    const line = pos.row + 1;
+    const col = pos.column + 1;
+
+    if (mode === 1) el.textContent = `Line ${line}`;
+    else if (mode === 2) el.textContent = `Col ${col}`;
+    else if (mode === 3) el.textContent = `Line ${line}, Col ${col}`;
   }
 
   function updateNestButton() {
@@ -128,16 +146,25 @@
     };
     nestBtn.textContent = modeLabels[settings['mode']] || 'Nest!';
 
-    // Update colors based on mode
-    const modeColors = {
-        '0': '--red-colour-medium',
-        '1': '--pri-colour-medium',
-        '2': '--pri-colour-lighter',
-        '3': '--sec-colour-medium'
-    };
-    const colorVar = modeColors[settings['mode']] || '--sec-colour-medium';
-    nestBtn.style.background = `var(${colorVar})`;
-    nestBtn.style.boxShadow = `0 0 20px var(${colorVar})`;
+    if (window.autoProcess) {
+        nestBtn.innerText = 'Auto';
+        nestBtn.classList.remove('vibrant');
+        nestBtn.classList.add('neutral');
+        nestBtn.disabled = true;
+    } else {
+        nestBtn.classList.add('vibrant');
+        nestBtn.classList.remove('neutral');
+        nestBtn.disabled = false;
+
+        const modeColors = {
+            '0': '--red-colour-medium',
+            '1': '--pri-colour-medium',
+            '2': '--pri-colour-lighter',
+            '3': '--sec-colour-medium'
+        };
+        const colorVar = modeColors[settings['mode']] || '--sec-colour-medium';
+        nestBtn.style.setProperty('--vibrant-color', `var(${colorVar})`);
+    }
   }
 
   // Event Listeners
@@ -174,9 +201,28 @@
 
   // Initialize
   const checkEditors = setInterval(() => {
-    if (window.inputEditor && window.outputEditor) {
+    // Support both variable names as mentioned in review
+    const input = window.inputEditor || window.inputEditorInstance;
+    const output = window.outputEditor || window.outputEditorInstance;
+
+    if (input && output) {
+      window.inputEditor = input;
+      window.outputEditor = output;
+
       initUI();
       applySettings();
+
+      // Setup cursor listeners for coordinates
+      [window.inputEditor, window.outputEditor].forEach(editor => {
+          editor.selection.on('changeCursor', () => {
+              const tab = editor.container.parentElement.querySelector('.editorTab');
+              const coordsEl = tab?.querySelector('.editorCoordinates');
+              if (coordsEl) {
+                  updateCoordText(editor, coordsEl, parseInt(settings['coords']));
+              }
+          });
+      });
+
       clearInterval(checkEditors);
     }
   }, 100);

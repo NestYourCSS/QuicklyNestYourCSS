@@ -13,13 +13,16 @@
   <script defer src="/_vercel/insights/script.js"></script>
 
   <script src="./lib/ace.min.js"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <link href="./styles/keyframes.css" rel="stylesheet">
   <link href="./styles/editor.css" rel="stylesheet">
   <link href="./styles/main.css" rel="stylesheet">
 </head>
 <body>
-  <button id="settings-toggle">⚙️</button>
+  <button id="settings-toggle">
+    <i class="ph ph-gear-six"></i>
+  </button>
   <div id="settings-popover" class="hidden">
     <div class="settings-section">
       <h4 class="section-title">Editor</h4>
@@ -28,7 +31,10 @@
         <div class="setting-controls">
           <select id="setting-font" class="custom-select">
             <option value="'Fira Code', monospace">Fira Code</option>
-            <option value="'Poppins', sans-serif">Poppins</option>
+            <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+            <option value="'PT Mono', monospace">PT Mono</option>
+            <option value="'Source Code Pro', monospace">Source Code Pro</option>
+            <option value="monospace">Monospace</option>
           </select>
           <select id="setting-fontsize" class="custom-select small">
             <option value="12">0.75rem</option>
@@ -97,13 +103,15 @@
       </div>
     </div>
   </div>
-  <div id="code-editor-wrapper">
-    <button>Nest!</button>
-    <div id="code-editor">
-      <div class="editor" id="inputEditor"></div>
-      <div class="editor" id="outputEditor"></div>
+  <main>
+    <div id="code-editor-wrapper">
+      <button>Nest!</button>
+      <div id="code-editor">
+        <div class="editor" id="inputEditor"></div>
+        <div class="editor" id="outputEditor"></div>
+      </div>
     </div>
-  </div>
+  </main>
 
   <script src="./scripts/main.js" type="text/javascript"></script>
   <script src="./scripts/setup.js" type="text/javascript"></script>
