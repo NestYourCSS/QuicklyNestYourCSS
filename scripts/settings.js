@@ -1,147 +1,79 @@
 (function() {
-    const settings = ['preserveComments', 'mode', 'auto', 'typefaces', 'fontsizes', 'indentationType', 'indentationSize', 'wordWrap', 'coordinates'];
+  const toggleBtn = document.getElementById('settings-toggle');
+  const popover = document.getElementById('settings-popover');
 
-    function isAceEditor(obj) {
-        return obj && typeof obj.setOption === 'function' && typeof obj.getSession === 'function';
+  toggleBtn.addEventListener('click', (e) => {
+    popover.classList.toggle('hidden');
+    e.stopPropagation();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!popover.contains(e.target) && e.target !== toggleBtn) {
+      popover.classList.add('hidden');
     }
+  });
 
-    function updateCoordinateDisplay() {
-        if (!isAceEditor(window.inputEditor) || !isAceEditor(window.outputEditor)) return;
+  // Functionality
+  const modeSelect = document.getElementById('setting-mode');
+  const commentsCheckbox = document.getElementById('setting-comments');
 
-        const val = parseInt(localStorage.getItem('coordinates')) || 0;
-        const inputPos = window.inputEditor.getCursorPosition();
-        const outputPos = window.outputEditor.getCursorPosition();
+  modeSelect.addEventListener('change', () => {
+    window.processMode = parseInt(modeSelect.value);
+    if (window.nestCode) window.nestCode();
+  });
 
-        const format = (pos) => {
-            if (val === 1) return ` Ln ${pos.row + 1}`;
-            if (val === 2) return ` Col ${pos.column + 1}`;
-            if (val === 3) return ` Ln ${pos.row + 1}, Col ${pos.column + 1}`;
-            return '';
-        };
+  commentsCheckbox.addEventListener('change', () => {
+    window.preserveComments = commentsCheckbox.checked;
+    if (window.nestCode) window.nestCode();
+  });
 
-        const inputCoord = document.getElementById('inputCoordinates');
-        const outputCoord = document.getElementById('outputCoordinates');
+  // Editor
+  const fontSelect = document.getElementById('setting-font');
+  const sizeInput = document.getElementById('setting-size');
+  const indentSelect = document.getElementById('setting-indent');
+  const wrapCheckbox = document.getElementById('setting-wrap');
+  const coordsCheckbox = document.getElementById('setting-coords');
 
-        if (inputCoord) inputCoord.textContent = format(inputPos);
-        if (outputCoord) outputCoord.textContent = format(outputPos);
+  function updateEditors() {
+    const editors = [window.inputEditor, window.outputEditor];
+    const fontSize = parseInt(sizeInput.value) || 16;
+    const fontFamily = fontSelect.value;
+    const useWrapMode = wrapCheckbox.checked;
+    const showGutter = coordsCheckbox.checked;
+    const indentChar = indentSelect.value;
+    const tabSize = indentChar === '\t' ? 4 : indentChar.length;
+    const useSoftTabs = indentChar !== '\t';
+
+    window.editorIndentChar = indentChar;
+
+    editors.forEach(editor => {
+      if (!editor) return;
+
+      editor.setOptions({
+        fontFamily: fontFamily,
+        fontSize: fontSize + "px"
+      });
+
+      editor.getSession().setUseWrapMode(useWrapMode);
+      editor.renderer.setShowGutter(showGutter);
+      editor.getSession().setTabSize(tabSize);
+      editor.getSession().setUseSoftTabs(useSoftTabs);
+    });
+
+    if (window.nestCode) window.nestCode();
+  }
+
+  fontSelect.addEventListener('change', updateEditors);
+  sizeInput.addEventListener('input', updateEditors);
+  indentSelect.addEventListener('change', updateEditors);
+  wrapCheckbox.addEventListener('change', updateEditors);
+  coordsCheckbox.addEventListener('change', updateEditors);
+
+  // Initialize after editors are ready
+  const checkEditors = setInterval(() => {
+    if (window.inputEditor && window.outputEditor) {
+      updateEditors();
+      clearInterval(checkEditors);
     }
-
-    function applySetting(id, value) {
-        const elem = document.getElementById(id);
-        if (!elem) return;
-
-        // Visual update
-        if (elem.classList.contains('checkbox')) {
-            const checkbox = elem.querySelector('input[type="checkbox"]');
-            if (checkbox) checkbox.checked = (value === 'true' || value === true);
-        } else if (elem.classList.contains('radio-group')) {
-            const radioButtons = elem.querySelectorAll('input[type="radio"]');
-            if (radioButtons[value]) radioButtons[value].checked = true;
-        } else if (elem.classList.contains('number')) {
-            const input = elem.querySelector('input');
-            if (input) input.value = value;
-        } else if (elem.tagName === 'SELECT' || elem.classList.contains('custom-select')) {
-            elem.value = value;
-        }
-
-        // Functional update
-        const inputEditor = window.inputEditor;
-        const outputEditor = window.outputEditor;
-
-        switch (id) {
-            case 'preserveComments':
-                window.preserveComments = (value === 'true' || value === true);
-                break;
-            case 'mode':
-                window.processMode = parseInt(value);
-                break;
-            case 'auto':
-                window.processAuto = (value === 'true' || value === true);
-                break;
-            case 'typefaces':
-                if (isAceEditor(inputEditor)) inputEditor.setOption('fontFamily', value);
-                if (isAceEditor(outputEditor)) outputEditor.setOption('fontFamily', value);
-                break;
-            case 'fontsizes':
-                if (isAceEditor(inputEditor)) inputEditor.setOption('fontSize', value);
-                if (isAceEditor(outputEditor)) outputEditor.setOption('fontSize', value);
-                break;
-            case 'indentationType':
-                const useSoft = (value === 'false' || value === false); // Hard = checked = true
-                if (isAceEditor(inputEditor)) inputEditor.getSession().setUseSoftTabs(useSoft);
-                if (isAceEditor(outputEditor)) outputEditor.getSession().setUseSoftTabs(useSoft);
-                break;
-            case 'indentationSize':
-                const size = parseInt(value);
-                if (isAceEditor(inputEditor)) inputEditor.getSession().setTabSize(size);
-                if (isAceEditor(outputEditor)) outputEditor.getSession().setTabSize(size);
-                break;
-            case 'wordWrap':
-                const wrap = (value === 'true' || value === true);
-                if (isAceEditor(inputEditor)) inputEditor.setOption('wrap', wrap);
-                if (isAceEditor(outputEditor)) outputEditor.setOption('wrap', wrap);
-                break;
-            case 'coordinates':
-                updateCoordinateDisplay();
-                break;
-        }
-    }
-
-    function updateAndCommit(id, value) {
-        localStorage.setItem(id, value);
-        applySetting(id, value);
-    }
-
-    window.updateCoordinateDisplay = updateCoordinateDisplay;
-
-    function initSettings() {
-        settings.forEach(id => {
-            const value = localStorage.getItem(id);
-            if (value !== null) {
-                applySetting(id, value);
-            }
-        });
-
-        // Event Listeners
-        document.querySelectorAll('.checkbox input').forEach(input => {
-            input.addEventListener('change', () => {
-                const labelGroup = input.closest('.checkbox');
-                updateAndCommit(labelGroup.id, input.checked);
-            });
-        });
-
-        document.querySelectorAll('.radio-group input').forEach(input => {
-            input.addEventListener('change', () => {
-                const group = input.closest('.radio-group');
-                const index = Array.from(group.querySelectorAll('input[type="radio"]')).indexOf(input);
-                updateAndCommit(group.id, index);
-            });
-        });
-
-        document.querySelectorAll('select.custom-select').forEach(select => {
-            select.addEventListener('change', () => {
-                updateAndCommit(select.id, select.value);
-            });
-        });
-
-        document.querySelectorAll('.number').forEach(stepper => {
-            const input = stepper.querySelector('input');
-            const up = stepper.querySelector('.up');
-            const down = stepper.querySelector('.down');
-
-            const change = (delta) => {
-                let val = parseInt(input.value) + delta;
-                if (val < 1) val = 1;
-                if (val > 32) val = 32;
-                updateAndCommit(stepper.id, val);
-            };
-
-            up.addEventListener('click', (e) => { e.preventDefault(); change(1); });
-            down.addEventListener('click', (e) => { e.preventDefault(); change(-1); });
-        });
-
-        updateCoordinateDisplay();
-    }
-
-    window.addEventListener('load', initSettings);
+  }, 100);
 })();
