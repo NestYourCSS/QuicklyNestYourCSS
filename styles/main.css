@@ -54,12 +54,12 @@ body {
     margin: 0;
     height: 100dvh;
     overflow: hidden;
-    padding: 0.5rem;
+    padding: 2rem;
     background: url('../assets/nycss-bg-pattern.png') 0 0.1dvh / 5dvh repeat,
     linear-gradient(45deg, black, var(--pri-colour-em-darker)),
     #0C2430;
-    display: grid;
-    grid-template-rows: 1fr;
+    display: flex;
+    flex-direction: column;
 }
 
 #code-editor-wrapper {
@@ -74,46 +74,49 @@ body {
         top: 2rem;
         right: 2rem;
         z-index: 1000;
-        padding: 0.6rem 1.8rem;
+        padding: 0.75rem 2rem;
         font-family: inherit;
         font-weight: 700;
-        font-size: 1rem;
-        text-transform: uppercase;
-        border: 2px solid var(--shades-darkest);
-        border-radius: 4px;
+        font-size: 2rem;
+        border: none;
+        border-radius: 50px;
         cursor: pointer;
         background: var(--sec-colour-medium);
-        color: var(--shades-darkest);
-        box-shadow: 4px 4px 0 var(--shades-darkest);
-        transition: all 0.1s ease;
+        color: var(--pri-colour-darkest);
+        box-shadow: 0 0 20px rgba(3, 196, 212, 0.4);
+        transition: all 0.2s ease;
 
         &:hover {
             background: var(--sec-colour-lighter);
-            transform: translate(-1px, -1px);
-            box-shadow: 5px 5px 0 var(--shades-darkest);
+            box-shadow: 0 0 30px rgba(3, 196, 212, 0.6);
+            transform: scale(1.05);
         }
 
         &:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0 var(--shades-darkest);
+            transform: scale(0.95);
         }
     }
 
     > #code-editor {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
-        grid-auto-rows: 1fr;
-        gap: 0.5rem;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
         height: 100%;
         width: 100%;
         position: relative;
 			
+        @media (max-width: 850px) {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1rem;
+        }
+
         .editorGroup {
             height: 100%;
             width: 100%;
             display: flex;
             flex-direction: column;
-            min-height: 0; /* Important for flex/grid children with overflow */
+            min-height: 0;
 
             &:has(button:active) {
                 --onClickValue1: 0.75;
