@@ -47,63 +47,73 @@
 html {
     margin: 0;
     height: 100%;
-    min-height: 100vh;
 }
 
 body {
     font-size: clamp(8px, 1.5vh, 24px);
     margin: 0;
-    height: 100%;
-    min-height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    padding: 0.5rem;
     background: url('../assets/nycss-bg-pattern.png') 0 0.1dvh / 5dvh repeat,
     linear-gradient(45deg, black, var(--pri-colour-em-darker)),
     #0C2430;
+    display: grid;
+    grid-template-rows: 1fr;
 }
 
 #code-editor-wrapper {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     width: 100%;
     height: 100%;
-    padding: 2rem;
-    gap: 2rem;
     box-sizing: border-box;
 
     > button {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1000;
+        padding: 0.6rem 1.8rem;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        border: 2px solid var(--shades-darkest);
+        border-radius: 4px;
         cursor: pointer;
-        flex: 0;
-        border-radius: 999px;
-        font-weight: bold;
-        border: none;
-        box-shadow: inset 0 0 1em 0 var(--shades-darkest);
-        background: var(--sec-colour-lighter);
-        transition: 0.25s;
-        padding: 1em 3.25em;
+        background: var(--sec-colour-medium);
+        color: var(--shades-darkest);
+        box-shadow: 4px 4px 0 var(--shades-darkest);
+        transition: all 0.1s ease;
 
         &:hover {
-            background: var(--sec-colour-lightest);
+            background: var(--sec-colour-lighter);
+            transform: translate(-1px, -1px);
+            box-shadow: 5px 5px 0 var(--shades-darkest);
+        }
+
+        &:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 var(--shades-darkest);
         }
     }
 
     > #code-editor {
-        position: relative;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+        grid-auto-rows: 1fr;
+        gap: 0.5rem;
         height: 100%;
-        width: auto;
-        --gutter-width: 0.5;
-        --editor-width: 5;
-        --total-width: calc(var(--gutter-width) + (2 * var(--editor-width)));
-
-        display: flex;
-        justify-content: center;
-        gap: calc((var(--gutter-width) / var(--total-width)) * 100%);
+        width: 100%;
+        position: relative;
 			
         .editorGroup {
             height: 100%;
             width: 100%;
             display: flex;
             flex-direction: column;
+            min-height: 0; /* Important for flex/grid children with overflow */
 
             &:has(button:active) {
                 --onClickValue1: 0.75;
@@ -129,6 +139,7 @@ body {
             display: flex;
             justify-content: space-between;
             padding: 0.75rem !important;
+            flex-shrink: 0;
         
             > .fileName {
                 font-size: 1rem;
@@ -162,57 +173,9 @@ body {
         }
 
         .editor {
-            /*
-            height: calc(100% - (editorTab's total height)
-            height: calc(100% - (<editorTab's "padding-block"> + <height of buttons>)
-            height: calc(100% - ((2 * 0.75rem) + 2rem));
-            */
-            
-            height: calc(100% - 3.5rem);
-            width: auto;
-            aspect-ratio: var(--editor-width) / 6.625;
+            flex: 1;
+            width: 100%;
+            min-height: 0;
         }
-    }
-}
-
-@media (max-width: 768px) {
-    body {
-        padding: 1rem;
-        overflow: hidden;
-        height: 100dvh;
-    }
-
-    #code-editor-wrapper {
-        padding: 0;
-        gap: 1rem;
-        height: 100%;
-    }
-
-    #code-editor {
-        flex: 1;
-        flex-direction: column;
-        width: 100%;
-        min-height: 0;
-        gap: 1rem;
-    }
-
-    .editorGroup {
-        flex: 1;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .editor {
-        flex: 1;
-        min-height: 0;
-        width: 100% !important;
-        height: auto !important;
-        aspect-ratio: auto !important;
-    }
-
-    #code-editor-wrapper > button {
-        flex-shrink: 0;
-        padding: 0.75em 2.5em;
     }
 }
