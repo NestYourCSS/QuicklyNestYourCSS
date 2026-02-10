@@ -49,8 +49,10 @@
           <li>
             <span>Coordinates</span>
             <div id="coordinates" class="radio-group">
-              <label><input type="radio" name="coordinates" value="true"> On</label>
-              <label><input type="radio" name="coordinates" value="false" checked> Off</label>
+              <label><input type="radio" name="coordinates" value="none" checked> None</label>
+              <label><input type="radio" name="coordinates" value="line"> Line</label>
+              <label><input type="radio" name="coordinates" value="col"> Col</label>
+              <label><input type="radio" name="coordinates" value="both"> Both</label>
             </div>
           </li>
         </ul>
@@ -82,7 +84,10 @@
           <li>
             <span>Indentation</span>
             <div class="indent-controls">
-              <label><input type="checkbox" id="indentationType" checked> Soft Tabs</label>
+              <div id="indentationType" class="radio-group">
+                <label><input type="radio" name="indentationType" value="soft" checked> Soft</label>
+                <label><input type="radio" name="indentationType" value="hard"> Hard</label>
+              </div>
               <label>Size: <input type="number" id="indentationSize" value="4" min="1" max="8"></label>
             </div>
           </li>

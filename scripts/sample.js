@@ -1720,8 +1720,8 @@ label {
 	
 	&:has(:disabled) {
 		&, &:hover {
-			--shades-true-darkest: color-mix(in srgb, var(--shades-black), var(--shades-darkest));
-			background: linear-gradient(to bottom, var(--shades-black), var(--shades-true-darkest));
+			--shades-true-darkest: color-mix(in srgb, var(--shades-darkest), var(--shades-darkest));
+			background: linear-gradient(to bottom, var(--shades-darkest), var(--shades-true-darkest));
 			box-shadow: inset 0 calc(-1rem / 16) var(--shades-darkest);
 			color: var(--shades-m-darker);
 			cursor: not-allowed;

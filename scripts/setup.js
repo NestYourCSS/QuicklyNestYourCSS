@@ -70,6 +70,14 @@ h1 {
     const isInputEditor = editor.container.id === inputEditor.container.id;
     const editorTab = createEditorTab(editor.container, isInputEditor, false);
     wrapEditorWithGroup(editor.container, editorTab);
+
+    // Update coordinates on selection change
+    const editorName = editor.container.id.slice(0, -"Editor".length);
+    const coordsDisplay = document.getElementById(`${editorName}Coordinates`);
+    editor.selection.on('changeCursor', () => {
+      const pos = editor.getCursorPosition();
+      coordsDisplay.textContent = `Ln ${pos.row + 1}, Col ${pos.column + 1}`;
+    });
   });
         
   function createButton(idSuffix, className, isShadowEditor) {
@@ -92,6 +100,14 @@ h1 {
 
     const tabButtons = document.createElement("div");
     tabButtons.classList.add('tabButtons');
+
+    // Coordinates display
+    const coordinates = document.createElement("div");
+    coordinates.classList.add('editorCoordinates');
+    coordinates.id = `${editorName}Coordinates`;
+    coordinates.textContent = "Ln 1, Col 1";
+    if (!(window.showCoordinates ?? false)) coordinates.style.display = 'none';
+    editorTab.appendChild(coordinates);
 
     // Add buttons to the tab
     tabButtons.appendChild(createButton(`${editorName}TabCopyAll`, 'tabCopyAll', isShadowEditor));

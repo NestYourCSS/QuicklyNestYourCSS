@@ -55,11 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         indentationType: {
-            defaultValue: true,
+            defaultValue: 'soft',
             action: (value) => {
                 if (typeof inputEditor === 'undefined' || typeof outputEditor === 'undefined') return;
-                inputEditor.getSession().setUseSoftTabs(value);
-                outputEditor.getSession().setUseSoftTabs(value);
+                const useSoft = value === 'soft';
+                inputEditor.getSession().setUseSoftTabs(useSoft);
+                outputEditor.getSession().setUseSoftTabs(useSoft);
                 updateIndentChar();
             }
         },
@@ -82,14 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         coordinates: {
-            defaultValue: 'false',
+            defaultValue: 'none',
             action: (value) => {
-                if (typeof inputEditor === 'undefined' || typeof outputEditor === 'undefined') return;
-                const show = value === 'true';
-                inputEditor.setOption('showGutter', show);
-                inputEditor.setOption('showLineNumbers', show);
-                outputEditor.setOption('showGutter', show);
-                outputEditor.setOption('showLineNumbers', show);
+                window.showCoordinates = value;
+                updateCoordinateDisplays();
             }
         }
     };
@@ -133,10 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const modeNames = ['Minify!', 'Beautify!', 'Denest!', 'Nest!'];
         const modeColors = [
-            'var(--red-colour-medium)',
-            'var(--sec-colour-medium)',
-            'var(--pri-colour-medium)',
-            'var(--sec-colour-lighter)'
+            { start: 'var(--red-colour-medium)', end: 'var(--red-colour-m-darker)', glow: 'var(--red-colour-medium)' },
+            { start: 'var(--sec-colour-medium)', end: 'var(--sec-colour-m-darker)', glow: 'var(--sec-colour-medium)' },
+            { start: 'var(--pri-colour-medium)', end: 'var(--pri-colour-m-darker)', glow: 'var(--pri-colour-medium)' },
+            { start: 'var(--sec-colour-lighter)', end: 'var(--sec-colour-medium)', glow: 'var(--sec-colour-lighter)' }
         ];
 
         const mode = window.processMode ?? 3;
@@ -144,10 +141,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (window.processAuto) {
             nestBtn.disabled = true;
-            nestBtn.style.background = 'var(--shades-darker)';
+            nestBtn.style.setProperty('--btn-bg', 'var(--shades-m-darker)');
+            nestBtn.style.setProperty('--btn-glow', 'transparent');
         } else {
+            const colors = modeColors[mode];
             nestBtn.disabled = false;
-            nestBtn.style.background = modeColors[mode];
+            nestBtn.style.setProperty('--btn-bg', `linear-gradient(135deg, ${colors.start}, ${colors.end})`);
+            nestBtn.style.setProperty('--btn-glow', colors.glow);
         }
     }
 
@@ -159,6 +159,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.processAuto && typeof nestCode === 'function') {
             nestCode();
         }
+    }
+
+    function updateCoordinateDisplays() {
+        const mode = window.showCoordinates || 'none';
+        const inputCoords = document.querySelector('#inputEditor').parentElement.querySelector('.editorCoordinates');
+        const outputCoords = document.querySelector('#outputEditor').parentElement.querySelector('.editorCoordinates');
+
+        const updateDisplay = (display, editor) => {
+            if (!display || !editor) return;
+            if (mode === 'none') {
+                display.style.display = 'none';
+                return;
+            }
+            display.style.display = 'block';
+            const pos = editor.getCursorPosition();
+            const ln = pos.row + 1;
+            const col = pos.column + 1;
+
+            if (mode === 'line') display.textContent = `Ln ${ln}`;
+            else if (mode === 'col') display.textContent = `Col ${col}`;
+            else if (mode === 'both') display.textContent = `Ln ${ln}, Col ${col}`;
+        };
+
+        updateDisplay(inputCoords, window.inputEditor);
+        updateDisplay(outputCoords, window.outputEditor);
+    }
+
+    function adjustInputWidth(input) {
+        if (!input) return;
+        const value = input.value || "";
+        input.style.width = (value.length + 2) + "ch";
     }
 
     function handleSettingChange(id, value) {
@@ -193,6 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     settingsPopover.addEventListener('input', (e) => {
         if (e.target.type === 'number') {
+            adjustInputWidth(e.target);
             handleSettingChange(e.target.id, e.target.value);
         }
     });
@@ -200,11 +232,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize
     window.waitForVar('inputEditor').then(() => {
         loadSettings();
+
+        // Cursor listeners for coordinates
+        inputEditor.selection.on('changeCursor', updateCoordinateDisplays);
+        outputEditor.selection.on('changeCursor', updateCoordinateDisplays);
+
         // Initial actions
         for (const key in settings) {
             if (settingsConfig[key].action) {
                 settingsConfig[key].action(settings[key]);
             }
         }
+
+        // Adjust width for number inputs initially
+        const numberInputs = settingsPopover.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(adjustInputWidth);
     });
 });
