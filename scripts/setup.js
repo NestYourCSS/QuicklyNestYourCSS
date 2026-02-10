@@ -37,11 +37,13 @@ h1 {
   let isProcessing = false;
 
   inputEditor.getSession().on('change', () => {
-    codeChanged = true;
+    if (window.processAuto ?? true) {
+      codeChanged = true;
+    }
   });
 
   inputEditor.getSession().on('changeAnnotation', () => {
-    if (!isProcessing) {
+    if ((window.processAuto ?? true) && !isProcessing) {
       isProcessing = true;
 
       setTimeout(() => {
