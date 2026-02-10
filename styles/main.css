@@ -118,7 +118,7 @@ body {
             --window-text-colour: rgb(from var(--shades-darker) r g b / var(--opacity-medium));
             line-height: 100%;
             color: rgb(from var(--shades-medium) r g b / 50%);
-            font-size: 0.5rem;
+            font-size: 1rem;
             font-family: "Fira Code", monospace;
             border: 0.25rch solid var(--window-text-colour);
             border-radius: 1rem 1rem 0 0;
