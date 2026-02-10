@@ -47,61 +47,76 @@
 html {
     margin: 0;
     height: 100%;
-    min-height: 100vh;
 }
 
 body {
     font-size: clamp(8px, 1.5vh, 24px);
     margin: 0;
-    height: 100%;
-    min-height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    padding: 2rem;
     background: url('../assets/nycss-bg-pattern.png') 0 0.1dvh / 5dvh repeat,
     linear-gradient(45deg, black, var(--pri-colour-em-darker)),
     #0C2430;
+    display: flex;
+    flex-direction: column;
 }
 
 #code-editor-wrapper {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     width: 100%;
     height: 100%;
-    padding: 2rem;
-    gap: 2rem;
     box-sizing: border-box;
 
     > button {
-        cursor: pointer;
-        flex: 0;
-        border-radius: 999px;
-        font-weight: bold;
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 1000;
+        padding: 0.75rem 2rem;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 2rem;
         border: none;
-        box-shadow: inset 0 0 1em 0 var(--shades-darkest);
-        background: var(--sec-colour-lighter);
-        transition: 0.25s;
-        padding: 1em 3.25em;
+        border-radius: 50px;
+        cursor: pointer;
+        background: var(--sec-colour-medium);
+        color: var(--pri-colour-darkest);
+        box-shadow: 0 0 20px rgba(3, 196, 212, 0.4);
+        transition: all 0.2s ease;
 
         &:hover {
-            background: var(--sec-colour-lightest);
+            background: var(--sec-colour-lighter);
+            box-shadow: 0 0 30px rgba(3, 196, 212, 0.6);
+            transform: scale(1.05);
+        }
+
+        &:active {
+            transform: scale(0.95);
         }
     }
 
     > #code-editor {
-        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
         height: 100%;
-        width: auto;
-        --gutter-width: 0.5;
-        --editor-width: 5;
-        --total-width: calc(var(--gutter-width) + (2 * var(--editor-width)));
-
-        display: flex;
-        justify-content: center;
-        gap: calc((var(--gutter-width) / var(--total-width)) * 100%);
+        width: 100%;
+        position: relative;
 			
+        @media (max-width: 850px) {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1rem;
+        }
+
         .editorGroup {
             height: 100%;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
 
             &:has(button:active) {
                 --onClickValue1: 0.75;
@@ -127,6 +142,7 @@ body {
             display: flex;
             justify-content: space-between;
             padding: 0.75rem !important;
+            flex-shrink: 0;
         
             > .fileName {
                 font-size: 1rem;
@@ -160,15 +176,9 @@ body {
         }
 
         .editor {
-            /*
-            height: calc(100% - (editorTab's total height)
-            height: calc(100% - (<editorTab's "padding-block"> + <height of buttons>)
-            height: calc(100% - ((2 * 0.75rem) + 2rem));
-            */
-            
-            height: calc(100% - 3.5rem);
-            width: auto;
-            aspect-ratio: var(--editor-width) / 6.625;
+            flex: 1;
+            width: 100%;
+            min-height: 0;
         }
     }
 }
