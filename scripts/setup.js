@@ -90,7 +90,7 @@ h1 {
 
     const editorCoords = document.createElement("div");
     editorCoords.classList.add('editorCoordinates');
-    editorCoords.textContent = 'Line 1, Col 1';
+    editorCoords.textContent = '1:1';
 
     const tabButtons = document.createElement("div");
     tabButtons.classList.add('tabButtons');

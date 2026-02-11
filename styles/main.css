@@ -55,20 +55,17 @@ html {
     display: none !important;
 }
 
-#settings-toggle {
-    right: 12rem;
-    min-width: 8rem;
-}
-
-#nest-btn {
+.header-controls {
+    position: fixed;
+    top: 2rem;
     right: 2rem;
-    min-width: 8rem;
+    z-index: 1000;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
 }
 
 .header-btn {
-    position: absolute;
-    top: 2rem;
-    z-index: 1000;
     cursor: pointer;
     padding: 1rem 1.75ch;
     text-align: center;
@@ -80,30 +77,59 @@ html {
     border: none;
     color: var(--shades-lightest);
     box-shadow: inset 0 1px oklch(100% none none / 0.25);
+    min-width: 8rem;
 
     --top-colour: var(--shades-m-darker);
     --bottom-colour: var(--shades-em-darker);
     --component-background: color-mix(in srgb, var(--shades-darkest), #000 75%);
 
-    background: linear-gradient(to bottom, var(--top-colour), var(--bottom-colour) 45%, transparent 55%) 0% 0% / 100% 210% no-repeat, var(--component-background);
-    transition: background-position 0.125s ease-out, transform 0.2s;
-    background-position: 0% 0%;
+    background: linear-gradient(to bottom, var(--top-colour), var(--bottom-colour) 45%, transparent 55%) 0% 100% / 100% 210% no-repeat, var(--component-background);
+    transition: background-position 0.125s ease-out, transform 0.2s, filter 0.2s;
+    background-position: 0% 100%;
 }
 
 .header-btn:hover {
-    color: var(--shades-lightest);
+    filter: brightness(1.2);
+    transform: scale(1.05);
 }
 
 .header-btn.vibrant {
     --top-colour: var(--sec-colour-m-darker);
     --bottom-colour: var(--pri-colour-darkest);
+    background-position: 0% 0%;
 }
 
 #mainSettings {
-    position: absolute;
-    top: 7rem;
+    position: fixed;
+    top: calc(2rem + 1.125rem + 2rem + 1rem); /* top + height + 1rem gap. padding is 1rem top/bottom, font is 1.125rem. approx height is 3.125rem? No, padding 1rem = 2rem + 1.125 = 3.125. */
+    /* Let's be more precise if possible, but the button has fixed height approx. */
+    /* top: 2rem (start) + button height + 1rem gap */
+    /* Better: position relative to the container. */
+}
+
+/* Redefine positioning for popover relative to button */
+.header-controls {
+    position: fixed;
+    top: 2rem;
     right: 2rem;
+    z-index: 1000;
+}
+
+#mainSettings {
+    position: fixed;
     z-index: 1001;
+    /* We will use right: 0 and transform/offset to align content */
+    top: calc(2rem + 3.125rem + 1rem); /* top + button height + 1rem gap */
+    right: 0rem; /* Popover right = screen right */
+    /* Offset logic:
+       Button is 2rem from right.
+       Button width is variable but min 8rem.
+       Popover right should be Button right + 2rem.
+       If Button is 2rem from edge, Popover should be 0rem from edge (since padding is 2rem).
+       Let's check: Popover padding 2rem.
+       If popover right = 0rem, then content right = 2rem.
+       Button right = 2rem. Perfect match.
+    */
     width: clamp(320px, 90vw, 560px);
     max-height: calc(100vh - 9rem);
     overflow: hidden auto;
@@ -242,7 +268,8 @@ html {
     padding: 1em;
     gap: 0.5em;
     flex-direction: column;
-    background: var(--component-background);
+    background: color-mix(in srgb, var(--shades-darkest), black 75%);
+    backdrop-filter: blur(25px);
     border-bottom-left-radius: 1rem;
     border-bottom-right-radius: 1rem;
     box-shadow: 0px 10px 10px 2.5px rgb(from var(--shades-black) r g b / 0.5);
@@ -458,7 +485,7 @@ main {
             --window-text-colour: rgb(from var(--shades-darker) r g b / var(--opacity-medium));
             line-height: 100%;
             color: rgb(from var(--shades-medium) r g b / 50%);
-            font-size: 0.5rem;
+            font-size: 1rem;
             font-family: "Fira Code", monospace;
             border: 0.25rch solid var(--window-text-colour);
             border-radius: 1rem 1rem 0 0;
@@ -466,7 +493,7 @@ main {
             background-color: var(--background-colour);
             display: flex;
             justify-content: space-between;
-            padding: 0.75rem !important;
+            padding: 1rem !important;
 
             > .fileName {
                 font-size: 1em;
@@ -474,7 +501,7 @@ main {
             }
 
             .editorCoordinates {
-                font-size: 0.8em;
+                font-size: 0.75em;
                 align-content: center;
                 opacity: 0.6;
                 letter-spacing: 0.05em;
@@ -483,7 +510,7 @@ main {
             }
 
             > .tabButtons {
-                font-size: 0.5em;
+                font-size: 0.75em;
                 display: flex;
                 gap: 1em;
 

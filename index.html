@@ -20,9 +20,12 @@
   <link href="./styles/main.css" rel="stylesheet">
 </head>
 <body>
-  <button id="settings-toggle" class="header-btn">
-    <i class="ph ph-gear-six"></i>
-  </button>
+  <div class="header-controls">
+    <button id="nest-btn" class="header-btn">Nest!</button>
+    <button id="settings-toggle" class="header-btn vibrant">
+      <i class="ph ph-gear-six"></i>
+    </button>
+  </div>
 
   <aside id="mainSettings" class="hidden">
         <section>
@@ -142,7 +145,6 @@
   </aside>
   <main>
     <div id="code-editor-wrapper">
-      <button id="nest-btn" class="header-btn">Nest!</button>
       <div id="code-editor">
         <div class="editor" id="inputEditor"></div>
         <div class="editor" id="outputEditor"></div>

@@ -113,7 +113,7 @@
       });
 
       editor.getSession().setUseWrapMode(useWrapMode);
-      editor.getSession().setTabSize(indentType === 'tab' ? 4 : indentSize);
+      editor.getSession().setTabSize(indentSize);
       editor.getSession().setUseSoftTabs(indentType === 'space');
     });
 
@@ -133,7 +133,7 @@
     editors.forEach(editor => {
         if (!editor) return;
 
-        editor.renderer.setShowGutter(coordsMode === 1 || coordsMode === 3);
+        editor.renderer.setShowGutter(true);
 
         const tab = editor.container.parentElement.querySelector('.editorTab');
         if (!tab) return;
@@ -155,9 +155,9 @@
     const line = pos.row + 1;
     const col = pos.column + 1;
 
-    if (mode === 1) el.textContent = `Line ${line}`;
-    else if (mode === 2) el.textContent = `Col ${col}`;
-    else if (mode === 3) el.textContent = `Line ${line}, Col ${col}`;
+    if (mode === 1) el.textContent = line;
+    else if (mode === 2) el.textContent = col;
+    else if (mode === 3) el.textContent = `${line}:${col}`;
   }
 
   function updateNestButton() {
@@ -167,10 +167,12 @@
 
     // Reset classes
     nestBtn.classList.remove('vibrant');
+    nestBtn.style.cursor = 'pointer';
 
     if (window.autoProcess) {
         nestBtn.innerText = 'Auto';
         nestBtn.disabled = true;
+        nestBtn.style.cursor = 'not-allowed';
     } else {
         const modeLabels = { '0': 'Minify!', '1': 'Beautify!', '2': 'Denest!', '3': 'Nest!' };
         nestBtn.innerText = modeLabels[settings['mode']] || 'Nest!';
@@ -213,7 +215,7 @@
 
   // Indentation Size
   const indentInput = document.getElementById('indentation-size-input');
-  indentInput.addEventListener('change', (e) => {
+  indentInput.addEventListener('input', (e) => {
       updateSetting('indent-size', e.target.value);
   });
   document.getElementById('indent-up').addEventListener('click', () => {
