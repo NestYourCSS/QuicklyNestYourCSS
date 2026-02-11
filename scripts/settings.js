@@ -1,6 +1,6 @@
 (function() {
   const toggleBtn = document.getElementById('settings-toggle');
-  const popover = document.getElementById('settings-popover');
+  const popover = document.getElementById('mainSettings');
 
   // Toggle popover
   toggleBtn.addEventListener('click', (e) => {
@@ -12,6 +12,11 @@
     if (!popover.contains(e.target) && e.target !== toggleBtn) {
       popover.classList.add('hidden');
     }
+
+    // Close dropdowns when clicking outside
+    if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
+    }
   });
 
   // Default settings
@@ -20,7 +25,7 @@
     'comments': 'true',
     'auto': 'true',
     'font': "'Fira Code', monospace",
-    'fontsize': '16',
+    'fontsize': '1.25rem',
     'indent-type': 'tab',
     'indent-size': '4',
     'word-wrap': 'false',
@@ -35,38 +40,62 @@
 
   // Initialize UI
   function initUI() {
-    // Dropdowns
-    document.getElementById('setting-font').value = settings['font'];
-    document.getElementById('setting-fontsize').value = settings['fontsize'];
-    document.getElementById('setting-indent-size').value = settings['indent-size'];
+    // Fonts
+    const fontOutput = document.querySelector('#typefaces output');
+    const fontOptions = {
+        "'Fira Code', monospace": "Fira Code",
+        "'JetBrains Mono', monospace": "Jetbrains Mono",
+        "'PT Mono', monospace": "PT Mono",
+        "monospace": "DejaVu Mono"
+    };
+    fontOutput.textContent = fontOptions[settings['font']] || "Fira Code";
 
-    // Segmented controls
-    document.querySelectorAll('.segmented-control').forEach(control => {
-      const setting = control.dataset.setting;
-      const value = settings[setting];
-      control.querySelectorAll('button').forEach(btn => {
-        if (btn.value === value) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-    });
+    // Font Size
+    const sizeOutput = document.querySelector('#fontsizes output');
+    sizeOutput.textContent = settings['fontsize'];
+
+    // Indentation Type (Checkbox: checked = Hard/Tab, unchecked = Soft/Space)
+    const indentTypeCb = document.getElementById('indentation-type-checkbox');
+    indentTypeCb.checked = settings['indent-type'] === 'tab';
+
+    // Indentation Size
+    const indentSizeInput = document.getElementById('indentation-size-input');
+    indentSizeInput.value = settings['indent-size'];
+
+    // Word Wrap
+    const wrapCb = document.getElementById('word-wrap-checkbox');
+    wrapCb.checked = settings['word-wrap'] === 'true';
+
+    // Coordinates (Radios)
+    const coordRadio = document.querySelector(`input[name="coordinates"][value="${settings['coords']}"]`);
+    if (coordRadio) coordRadio.checked = true;
+
+    // Comments (Checkbox: checked = No, unchecked = Yes)
+    const commentsCb = document.getElementById('preserveComments-checkbox');
+    commentsCb.checked = settings['comments'] === 'false';
+
+    // Mode (Radios)
+    const modeRadio = document.querySelector(`input[name="mode"][value="${settings['mode']}"]`);
+    if (modeRadio) modeRadio.checked = true;
+
+    // Auto
+    const autoCb = document.getElementById('auto-checkbox');
+    autoCb.checked = settings['auto'] === 'true';
   }
 
   // Apply settings to app
   function applySettings() {
     window.processMode = parseInt(settings['mode']);
     window.preserveComments = settings['comments'] === 'true';
-
-    // Support both variable names as requested in review
     window.autoProcess = settings['auto'] === 'true';
     window.processAuto = window.autoProcess;
 
     const editors = [window.inputEditor, window.outputEditor];
     if (!editors[0]) return;
 
-    const fontSize = parseInt(settings['fontsize']);
+    const fontSizeStr = settings['fontsize']; // e.g. "1.25rem"
+    // Convert rem to px for Ace (approximate based on body font size)
+    const fontSize = parseFloat(fontSizeStr) * 16;
     const fontFamily = settings['font'];
     const useWrapMode = settings['word-wrap'] === 'true';
     const indentType = settings['indent-type'];
@@ -84,8 +113,6 @@
       });
 
       editor.getSession().setUseWrapMode(useWrapMode);
-
-      // Tab settings
       editor.getSession().setTabSize(indentType === 'tab' ? 4 : indentSize);
       editor.getSession().setUseSoftTabs(indentType === 'space');
     });
@@ -106,7 +133,6 @@
     editors.forEach(editor => {
         if (!editor) return;
 
-        // Use Ace's gutter for Line numbers if mode includes Line (1 or 3)
         editor.renderer.setShowGutter(coordsMode === 1 || coordsMode === 3);
 
         const tab = editor.container.parentElement.querySelector('.editorTab');
@@ -136,61 +162,96 @@
 
   function updateNestButton() {
     const nestBtn = document.getElementById('nest-btn');
-    if (!nestBtn) return;
+    const settingsBtn = document.getElementById('settings-toggle');
+    if (!nestBtn || !settingsBtn) return;
 
-    const modeLabels = {
-        '0': 'Minify!',
-        '1': 'Beautify!',
-        '2': 'Denest!',
-        '3': 'Nest!'
-    };
-    nestBtn.textContent = modeLabels[settings['mode']] || 'Nest!';
+    // Reset classes
+    nestBtn.classList.remove('vibrant');
 
     if (window.autoProcess) {
         nestBtn.innerText = 'Auto';
-        nestBtn.classList.remove('vibrant');
-        nestBtn.classList.add('neutral');
         nestBtn.disabled = true;
     } else {
-        nestBtn.classList.add('vibrant');
-        nestBtn.classList.remove('neutral');
+        const modeLabels = { '0': 'Minify!', '1': 'Beautify!', '2': 'Denest!', '3': 'Nest!' };
+        nestBtn.innerText = modeLabels[settings['mode']] || 'Nest!';
         nestBtn.disabled = false;
-
-        const modeColors = {
-            '0': '--red-colour-medium',
-            '1': '--pri-colour-medium',
-            '2': '--pri-colour-lighter',
-            '3': '--sec-colour-medium'
-        };
-        const colorVar = modeColors[settings['mode']] || '--sec-colour-medium';
-        nestBtn.style.setProperty('--vibrant-color', `var(${colorVar})`);
+        nestBtn.classList.add('vibrant');
     }
   }
 
   // Event Listeners
-  document.getElementById('setting-font').addEventListener('change', (e) => {
-    updateSetting('font', e.target.value);
+
+  // Font Dropdown
+  document.querySelectorAll('#typefaces-listbox li').forEach(li => {
+      li.addEventListener('click', () => {
+          const fontMap = {
+              "DejaVu Mono": "monospace",
+              "Fira Code": "'Fira Code', monospace",
+              "Jetbrains Mono": "'JetBrains Mono', monospace",
+              "PT Mono": "'PT Mono', monospace"
+          };
+          const val = fontMap[li.textContent] || "'Fira Code', monospace";
+          document.querySelector('#typefaces output').textContent = li.textContent;
+          document.getElementById('typefaces-checkbox').checked = false;
+          updateSetting('font', val);
+      });
   });
 
-  document.getElementById('setting-fontsize').addEventListener('change', (e) => {
-    updateSetting('fontsize', e.target.value);
+  // Font Size Dropdown
+  document.querySelectorAll('#fontsizes-listbox li').forEach(li => {
+      li.addEventListener('click', () => {
+          document.querySelector('#fontsizes output').textContent = li.textContent;
+          document.getElementById('fontsizes-checkbox').checked = false;
+          updateSetting('fontsize', li.textContent);
+      });
   });
 
-  document.getElementById('setting-indent-size').addEventListener('input', (e) => {
-    updateSetting('indent-size', e.target.value);
+  // Indentation Type
+  document.getElementById('indentation-type-checkbox').addEventListener('change', (e) => {
+      updateSetting('indent-type', e.target.checked ? 'tab' : 'space');
   });
 
-  document.querySelectorAll('.segmented-control button').forEach(button => {
-    button.addEventListener('click', () => {
-      const parent = button.parentElement;
-      const setting = parent.dataset.setting;
-      const value = button.value;
+  // Indentation Size
+  const indentInput = document.getElementById('indentation-size-input');
+  indentInput.addEventListener('change', (e) => {
+      updateSetting('indent-size', e.target.value);
+  });
+  document.getElementById('indent-up').addEventListener('click', () => {
+      indentInput.value = parseInt(indentInput.value) + 1;
+      updateSetting('indent-size', indentInput.value);
+  });
+  document.getElementById('indent-down').addEventListener('click', () => {
+      indentInput.value = Math.max(1, parseInt(indentInput.value) - 1);
+      updateSetting('indent-size', indentInput.value);
+  });
 
-      parent.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
+  // Word Wrap
+  document.getElementById('word-wrap-checkbox').addEventListener('change', (e) => {
+      updateSetting('word-wrap', e.target.checked ? 'true' : 'false');
+  });
 
-      updateSetting(setting, value);
-    });
+  // Coordinates
+  document.querySelectorAll('input[name="coordinates"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+          updateSetting('coords', e.target.value);
+      });
+  });
+
+  // Comments
+  document.getElementById('preserveComments-checkbox').addEventListener('change', (e) => {
+      updateSetting('comments', e.target.checked ? 'false' : 'true');
+  });
+
+  // Mode
+  document.querySelectorAll('input[name="mode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+          updateSetting('mode', e.target.value);
+      });
+  });
+
+  // Auto
+  document.getElementById('auto-checkbox').addEventListener('change', (e) => {
+      updateSetting('auto', e.target.checked ? 'true' : 'false');
   });
 
   function updateSetting(key, value) {
@@ -201,18 +262,10 @@
 
   // Initialize
   const checkEditors = setInterval(() => {
-    // Support both variable names as mentioned in review
-    const input = window.inputEditor || window.inputEditorInstance;
-    const output = window.outputEditor || window.outputEditorInstance;
-
-    if (input && output) {
-      window.inputEditor = input;
-      window.outputEditor = output;
-
+    if (window.inputEditor && window.outputEditor) {
       initUI();
       applySettings();
 
-      // Setup cursor listeners for coordinates
       [window.inputEditor, window.outputEditor].forEach(editor => {
           editor.selection.on('changeCursor', () => {
               const tab = editor.container.parentElement.querySelector('.editorTab');

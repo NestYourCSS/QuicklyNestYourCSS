@@ -33,6 +33,7 @@
     --shades-lighter: #cecece;
     --shades-em-lighter: #dedede;
     --shades-lightest: #ffffff;
+    --shades-black: #000000;
 
     --opacity-none: 0;
     --opacity-low: 0.25;
@@ -55,207 +56,323 @@ html {
 }
 
 #settings-toggle {
+    right: 12rem;
+    min-width: 8rem;
+}
+
+#nest-btn {
+    right: 2rem;
+    min-width: 8rem;
+}
+
+.header-btn {
     position: absolute;
     top: 2rem;
-    right: 15rem;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    width: 4rem;
-    height: 4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     cursor: pointer;
-    backdrop-filter: blur(10px);
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1.5rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 1rem 1.75ch;
+    text-align: center;
+    align-content: center;
+    border-radius: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 300;
+    border: none;
+    color: var(--component-text, var(--shades-medium));
+
+    --top-colour: var(--shades-m-darker);
+    --bottom-colour: var(--shades-em-darker);
+    --component-background: color-mix(in srgb, var(--shades-darkest), #000 75%);
+
+    background: linear-gradient(to bottom, var(--top-colour), var(--bottom-colour) 45%, var(--component-background) 55%) 0% 100% / 100% 210% no-repeat, var(--component-background);
+    transition: background-position 0.125s ease-out, transform 0.2s;
 }
 
-#settings-toggle:hover {
-    transform: scale(1.1);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    box-shadow: 0 0 20px var(--sec-colour-medium);
-    border-color: var(--sec-colour-medium);
+.header-btn:hover {
+    color: var(--shades-lightest);
 }
 
-#settings-popover {
+.header-btn.vibrant {
+    --top-colour: var(--sec-colour-m-darker);
+    --bottom-colour: var(--pri-colour-darkest);
+    background-position: 0% 0%;
+    box-shadow: inset 0 1px oklch(100% none none / 0.25);
+    color: var(--shades-lightest);
+}
+
+#mainSettings {
     position: absolute;
     top: 7rem;
     right: 2rem;
     z-index: 1001;
-    background: rgba(10, 10, 10, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 2rem;
-    padding: 2rem;
     width: clamp(320px, 90vw, 560px);
     max-height: calc(100vh - 9rem);
-    overflow-y: auto;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05) inset;
-    color: var(--shades-lightest);
-    font-family: 'Poppins', sans-serif;
-    backdrop-filter: blur(25px) saturate(180%);
-}
-
-#settings-popover::-webkit-scrollbar {
-    width: 10px;
-}
-
-#settings-popover::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-#settings-popover::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    border: 3px solid transparent;
-    background-clip: content-box;
-}
-
-#settings-popover::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.settings-section {
-    margin-bottom: 3rem;
-}
-
-.settings-section:last-child {
-    margin-bottom: 0;
-}
-
-.section-title {
-    margin-top: 0;
-    margin-bottom: 2rem;
-    color: white;
-    font-size: 1.25rem;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-}
-
-.setting-row {
-    margin-bottom: 2rem;
+    overflow: hidden auto;
     display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-bottom: 2rem;
+    scrollbar-width: none; /* Hide scrollbar */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+#mainSettings::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+#mainSettings {
+    font-family: 'Poppins', sans-serif;
+}
+
+#mainSettings > section {
+    border-radius: 3rem;
+    --panel-background: color-mix(in srgb, var(--shades-darkest), #000 75%);
+    background-color: var(--panel-background);
+    backdrop-filter: blur(25px) saturate(180%);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+#mainSettings > section > h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: normal;
+    color: var(--shades-medium);
+}
+
+#mainSettings > section > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    --component-gap: 0.5rem;
+    --component-background: color-mix(in srgb, #000, var(--shades-darkest));
+    --component-background-selected: linear-gradient(to right, var(--shades-m-darker), var(--shades-em-darker));
+    --component-box-shadow-selected: inset 0 1px oklch(100% none none / var(--opacity-low));
+    --component-box-shadow-focused: 0 0 1.5em var(--shades-medium);
+    --component-text: color-mix(in srgb, var(--shades-darker), var(--shades-medium));
+    --component-text-hover: var(--shades-medium);
+    gap: var(--component-gap);
+}
+
+#mainSettings > section > ul > li {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
     align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
 }
 
-.setting-label {
+#mainSettings > section > ul > li > span {
+    cursor: auto;
+    grid-column: span 3;
     font-size: 1.125rem;
-    color: white;
-    font-weight: 400;
-    flex: 0 0 140px;
-    white-space: nowrap;
+    font-weight: 300;
+    color: var(--component-text);
 }
 
-.setting-controls {
+#mainSettings > section > ul > li > div {
+    grid-column: span 7;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: var(--component-gap);
+    color: var(--component-text);
+    font-size: 1rem;
+}
+
+#mainSettings .dropdown {
+    user-select: none;
+    display: inline-flex;
+    flex-direction: column;
+    width: auto;
+    margin: 0;
+    text-align: left;
+    box-sizing: content-box;
+    position: relative;
+    flex: 1;
+}
+
+#mainSettings .dropdown > input {
+    appearance: none;
+    position: absolute;
+    margin: 0;
+}
+
+#mainSettings .dropdown:focus-within > input:checked ~ ul {
+    display: flex;
+}
+
+#mainSettings .dropdown:focus-within > output {
+    z-index: 1;
+    box-shadow: var(--component-box-shadow-focused);
+}
+
+#mainSettings .dropdown > output {
+    outline: none !important;
+    cursor: pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    background: url("data:image/svg+xml,%3Csvg fill='%23484848' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11.178 19.569a.998.998 0 0 0 1.644 0l9-13A.999.999 0 0 0 21 5H3a1.002 1.002 0 0 0-.822 1.569l9 13z'%3E%3C/path%3E%3C/svg%3E") right 1rem top 50% / 1ch no-repeat, var(--component-background);
+    border-radius: 1rem;
+    padding: 1rem;
+    padding-right: 3rem;
+}
+
+#mainSettings .dropdown > output:hover {
+    color: var(--component-text-hover);
+}
+
+#mainSettings .dropdown > ul {
+    display: none;
+    position: absolute;
+    z-index: 999;
+    top: 100%;
+    width: 100%;
+    margin: 0.25rem 0 0;
+    padding: 1rem;
+    gap: 0.5rem;
+    flex-direction: column;
+    background: var(--component-background);
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    box-shadow: 0px 10px 10px 2.5px rgba(0,0,0,0.5);
+    list-style: none;
+}
+
+#mainSettings .dropdown > ul > li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+#mainSettings .dropdown > ul > li:hover {
+    color: var(--component-text-hover);
+}
+
+#mainSettings .number {
+    user-select: none;
+    position: relative;
+    width: fit-content;
+    color: var(--component-text);
+    padding: 1rem;
+    background: var(--component-background);
+    border-radius: 1rem;
     display: flex;
     gap: 1rem;
-    align-items: center;
-    flex: 0 0 340px;
-    justify-content: flex-end;
 }
 
-.custom-select {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.8);
-    padding: 0.6rem 1rem;
-    border-radius: 0.75rem;
-    font-family: inherit;
-    font-size: 0.9rem;
-    cursor: pointer;
-    flex: 1;
-    min-width: 0;
-    transition: background 0.2s;
+#mainSettings .number:hover {
+    color: var(--component-text-hover);
+}
+
+#mainSettings .number > output {
+    display: flex;
+    align-items: center;
+}
+
+#mainSettings .number > output > input {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font: inherit;
+    width: 3ch;
+    text-align: center;
     outline: none;
 }
 
-.custom-select.small {
-    flex: 0 0 110px;
-}
-
-.custom-select:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.segmented-control {
+#mainSettings .number > output > div {
     display: flex;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 1rem;
-    padding: 0.25rem;
+    flex-direction: column;
     gap: 0.25rem;
-    flex: 1;
-    min-width: 0;
 }
 
-.segmented-control.wide {
-    width: 100%;
-}
-
-.segmented-control button {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.4);
-    padding: 0.6rem 0.25rem;
-    border-radius: 0.75rem;
+#mainSettings .number > output > div > svg {
     cursor: pointer;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    width: 1ch;
 }
 
-.segmented-control button.active {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
-}
-
-.segmented-control button:not(.active):hover {
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.stepper-input {
+#mainSettings .checkbox {
+    user-select: none;
+    position: relative;
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
+    border-radius: 1rem;
+    background: var(--component-background);
+    flex: 1;
+    cursor: pointer;
+    overflow: hidden;
 }
 
-.stepper-label {
-    font-size: 0.9rem;
-    white-space: nowrap;
+#mainSettings .checkbox::before {
+    position: absolute;
+    content: '';
+    height: 100%;
+    left: 0%;
+    width: 50%;
+    border-radius: inherit;
+    background: var(--component-background-selected);
+    box-shadow: var(--component-box-shadow-selected);
+    z-index: 0;
+    transition: 0.25s;
 }
 
-.stepper-input input {
-    background: transparent;
-    border: none;
-    color: white;
-    width: 30px;
-    font-family: inherit;
-    font-size: 1rem;
-    font-weight: bold;
+#mainSettings .checkbox:has(:checked)::before {
+    left: 50%;
+}
+
+#mainSettings .checkbox > input {
+    appearance: none;
+    position: absolute;
+    margin: 0;
+}
+
+#mainSettings .checkbox > span {
+    position: relative;
+    flex: 1;
+    padding: 1rem;
     text-align: center;
-    -moz-appearance: textfield;
+    z-index: 1;
 }
 
-.stepper-input input::-webkit-outer-spin-button,
-.stepper-input input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
+#mainSettings .checkbox > span:hover {
+    color: var(--component-text-hover);
+}
+
+#mainSettings .radio-group {
+    user-select: none;
+    display: flex;
+    gap: var(--component-gap);
+    flex: 1;
+}
+
+#mainSettings .radio-group > label {
+    flex: 1;
+    cursor: pointer;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 1rem;
+    --top-colour: var(--shades-m-darker);
+    --bottom-colour: var(--shades-em-darker);
+    background: linear-gradient(to bottom, var(--top-colour), var(--bottom-colour) 45%, var(--component-background) 55%) 0% 100% / 100% 210% no-repeat, var(--component-background);
+    transition: background-position 0.125s ease-out;
+}
+
+#mainSettings .radio-group > label:has(:checked) {
+    box-shadow: var(--component-box-shadow-selected);
+    background-position: 0% 0%;
+    color: var(--shades-lightest);
+}
+
+#mainSettings .radio-group > label:hover {
+    color: var(--component-text-hover);
+}
+
+#mainSettings .radio-group > label > input {
+    appearance: none;
+    position: absolute;
     margin: 0;
 }
 
@@ -281,70 +398,6 @@ main {
     padding: 8rem 2rem 2rem 2rem;
     gap: 2rem;
     position: relative;
-
-    > button {
-        position: absolute;
-        top: 2rem;
-        right: 2rem;
-        z-index: 1000;
-        padding: 0 2.5rem;
-        height: 4rem;
-        border-radius: 50px;
-        font-size: 1.8rem;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        /* Colorful state (Manual Mode) */
-        &.vibrant {
-            background: linear-gradient(135deg, var(--vibrant-color, var(--sec-colour-medium)), color-mix(in srgb, var(--vibrant-color, var(--sec-colour-medium)), black 20%));
-            color: white;
-            box-shadow: 0 10px 30px -10px var(--vibrant-color, var(--sec-colour-medium)), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-
-            &:hover {
-                transform: scale(1.05) translateY(-2px);
-                filter: brightness(1.1);
-                box-shadow: 0 15px 40px -10px var(--vibrant-color, var(--sec-colour-medium)), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-            }
-
-            &:active {
-                transform: scale(0.98) translateY(0);
-            }
-
-            &:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-                transform: none;
-                box-shadow: none;
-            }
-        }
-
-        /* Neutral state (Auto Mode) */
-        &.neutral {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-
-            &:hover:not(:disabled) {
-                transform: scale(1.05);
-                background: rgba(255, 255, 255, 0.1);
-                color: white;
-                box-shadow: 0 0 20px var(--sec-colour-medium);
-                border-color: var(--sec-colour-medium);
-            }
-
-            &:disabled {
-                cursor: default;
-                opacity: 0.8;
-            }
-        }
-    }
 
     @media (max-width: 800px) {
         padding-top: 7rem;

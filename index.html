@@ -20,92 +20,129 @@
   <link href="./styles/main.css" rel="stylesheet">
 </head>
 <body>
-  <button id="settings-toggle">
+  <button id="settings-toggle" class="header-btn">
     <i class="ph ph-gear-six"></i>
   </button>
-  <div id="settings-popover" class="hidden">
-    <div class="settings-section">
-      <h4 class="section-title">Editor</h4>
-      <div class="setting-row">
-        <span class="setting-label">Font</span>
-        <div class="setting-controls">
-          <select id="setting-font" class="custom-select">
-            <option value="'Fira Code', monospace">Fira Code</option>
-            <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
-            <option value="'PT Mono', monospace">PT Mono</option>
-            <option value="'Source Code Pro', monospace">Source Code Pro</option>
-            <option value="monospace">Monospace</option>
-          </select>
-          <select id="setting-fontsize" class="custom-select small">
-            <option value="12">0.75rem</option>
-            <option value="14">0.875rem</option>
-            <option value="16" selected>1rem</option>
-            <option value="20">1.25rem</option>
-            <option value="24">1.5rem</option>
-          </select>
-        </div>
-      </div>
-      <div class="setting-row">
-        <span class="setting-label">Indentation</span>
-        <div class="setting-controls">
-          <div class="segmented-control" data-setting="indent-type">
-            <button value="space">Soft</button>
-            <button value="tab" class="active">Hard</button>
-          </div>
-          <div class="stepper-input">
-            <span class="stepper-label">Size:</span>
-            <input type="number" id="setting-indent-size" value="4" min="1" max="8">
-          </div>
-        </div>
-      </div>
-      <div class="setting-row">
-        <span class="setting-label">Word Wrap</span>
-        <div class="segmented-control wide" data-setting="word-wrap">
-          <button value="false" class="active">Off</button>
-          <button value="true">On</button>
-        </div>
-      </div>
-      <div class="setting-row">
-        <span class="setting-label">Coordinates</span>
-        <div class="segmented-control wide" data-setting="coords">
-          <button value="0">None</button>
-          <button value="1">Line</button>
-          <button value="2">Col</button>
-          <button value="3" class="active">Both</button>
-        </div>
-      </div>
-    </div>
 
-    <div class="settings-section">
-      <h4 class="section-title">Functionality</h4>
-      <div class="setting-row">
-        <span class="setting-label">Comments?</span>
-        <div class="segmented-control wide" data-setting="comments">
-          <button value="true" class="active">Yes</button>
-          <button value="false">No</button>
-        </div>
-      </div>
-      <div class="setting-row">
-        <span class="setting-label">Mode</span>
-        <div class="segmented-control wide" data-setting="mode">
-          <button value="0">Minify</button>
-          <button value="1">Beautify</button>
-          <button value="2">Denest</button>
-          <button value="3" class="active">Nest</button>
-        </div>
-      </div>
-      <div class="setting-row">
-        <span class="setting-label">Auto</span>
-        <div class="segmented-control wide" data-setting="auto">
-          <button value="false">Off</button>
-          <button value="true" class="active">On</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <aside id="mainSettings" class="hidden">
+        <section>
+          <h2>Editor</h2>
+          <ul>
+            <li>
+              <span id="font-label">Font</span>
+              <div>
+                <label id="typefaces" class="dropdown" for="typefaces-checkbox" role="presentation">
+                  <input type="checkbox" id="typefaces-checkbox">
+                  <output role="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="typefaces-listbox" aria-labelledby="font-label" aria-activedescendant="typefaces-option-2">Fira Code</output>
+                  <ul hidden="" id="typefaces-listbox" role="listbox" aria-labelledby="font-label">
+                    <li id="typefaces-option-1" role="option" tabindex="-1">DejaVu Mono</li>
+                    <li id="typefaces-option-2" role="option" tabindex="-1" aria-selected="true">Fira Code</li>
+                    <li id="typefaces-option-3" role="option" tabindex="-1">iA Writer Mono</li>
+                    <li id="typefaces-option-4" role="option" tabindex="-1">Jetbrains Mono</li>
+                    <li id="typefaces-option-5" role="option" tabindex="-1">PT Mono</li>
+                  </ul>
+                </label>
+                <label id="fontsizes" class="dropdown" for="fontsizes-checkbox" role="presentation">
+                  <input type="checkbox" id="fontsizes-checkbox">
+                  <output role="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="fontsizes-listbox" aria-label="Font Size" aria-activedescendant="fontsizes-option-4">1.25rem</output>
+                  <ul hidden="" id="fontsizes-listbox" role="listbox" aria-label="Font Size">
+                    <li id="fontsizes-option-1" role="option" tabindex="-1">0.5rem</li>
+                    <li id="fontsizes-option-2" role="option" tabindex="-1">0.75rem</li>
+                    <li id="fontsizes-option-3" role="option" tabindex="-1">1rem</li>
+                    <li id="fontsizes-option-4" role="option" tabindex="-1" aria-selected="true">1.25rem</li>
+                    <li id="fontsizes-option-5" role="option" tabindex="-1">1.5rem</li>
+                    <li id="fontsizes-option-6" role="option" tabindex="-1">1.75rem</li>
+                    <li id="fontsizes-option-7" role="option" tabindex="-1">2rem</li>
+                    <li id="fontsizes-option-8" role="option" tabindex="-1">2.25rem</li>
+                    <li id="fontsizes-option-9" role="option" tabindex="-1">2.5rem</li>
+                  </ul>
+                </label>
+              </div>
+            </li>
+            <li>
+              <span id="indentation-type-label">Indentation</span>
+              <div>
+                <label id="indentationType" class="checkbox" for="indentation-type-checkbox">
+                  <input type="checkbox" id="indentation-type-checkbox" checked="" role="switch" aria-labelledby="indentation-type-label">
+                  <span aria-hidden="true">Soft</span>
+                  <span aria-hidden="true">Hard</span>
+                </label>
+
+                <label id="indentationSize" class="number" for="indentation-size-input">
+                  <span id="indentation-size-label">Size:</span>
+                  <output>
+                    <input type="text" inputmode="numeric" aria-labelledby="indentation-size-label" id="indentation-size-input" value="4">
+                    <div>
+                      <svg role="button" id="indent-up" aria-label="Increase indentation size" fill="#484848" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 19h18a1.002 1.002 0 0 0 .823-1.569l-9-13c-.373-.539-1.271-.539-1.645 0l-9 13A.999.999 0 0 0 3 19z"></path></svg>
+                      <svg role="button" id="indent-down" aria-label="Decrease indentation size" fill="#484848" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.178 19.569a.998.998 0 0 0 1.644 0l9-13A.999.999 0 0 0 21 5H3a1.002 1.002 0 0 0-.822 1.569l9 13z"></path></svg>
+                    </div>
+                  </output>
+                </label>
+              </div>
+            </li>
+            <li>
+              <span id="word-wrap-label">Word Wrap</span>
+              <div>
+                <label id="wordWrap" class="checkbox" for="word-wrap-checkbox">
+                  <input type="checkbox" role="switch" aria-labelledby="word-wrap-label" id="word-wrap-checkbox">
+                  <span aria-hidden="true">Off</span>
+                  <span aria-hidden="true">On</span>
+                </label>
+              </div>
+            </li>
+            <li>
+              <span id="coordinates-group-label">Coordinates</span>
+              <div>
+                <label id="coordinates" class="radio-group" role="radiogroup" aria-labelledby="coordinates-group-label">
+                  <label>None<input type="radio" name="coordinates" value="0" role="radio" id="coordinates-none"></label>
+                  <label>Line<input type="radio" name="coordinates" value="1" role="radio" id="coordinates-line"></label>
+                  <label>Col<input type="radio" name="coordinates" value="2" role="radio" id="coordinates-col"></label>
+                  <label>Both<input type="radio" name="coordinates" value="3" role="radio" id="coordinates-both" checked=""></label>
+                </label>
+              </div>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h2>Functionality</h2>
+          <ul>
+            <li>
+              <span id="preserveComments-label">Comments?</span>
+              <div>
+                <label id="preserveComments" class="checkbox" for="preserveComments-checkbox">
+                  <input type="checkbox" role="switch" aria-labelledby="preserveComments-label" id="preserveComments-checkbox">
+                  <span aria-hidden="true">Yes</span>
+                  <span aria-hidden="true">No</span>
+                </label>
+              </div>
+            </li>
+            <li>
+              <span id="mode-group-label">Mode</span>
+              <div>
+                <label id="mode" class="radio-group" role="radiogroup" aria-labelledby="mode-group-label">
+                  <label>Minify<input type="radio" name="mode" value="0" role="radio" id="mode-minify"></label>
+                  <label>Beautify<input type="radio" name="mode" value="1" role="radio" id="mode-beautify"></label>
+                  <label>Denest<input type="radio" name="mode" value="2" role="radio" id="mode-denest"></label>
+                  <label>Nest<input type="radio" name="mode" value="3" role="radio" id="mode-nest" checked=""></label>
+                </label>
+              </div>
+            </li>
+            <li>
+              <span id="auto-label">Auto</span>
+              <div>
+                <label id="auto" class="checkbox" for="auto-checkbox">
+                  <input type="checkbox" checked="" role="switch" aria-labelledby="auto-label" id="auto-checkbox">
+                  <span aria-hidden="true">Off</span>
+                  <span aria-hidden="true">On</span>
+                </label>
+              </div>
+            </li>
+          </ul>
+        </section>
+  </aside>
   <main>
     <div id="code-editor-wrapper">
-      <button id="nest-btn">Nest!</button>
+      <button id="nest-btn" class="header-btn">Nest!</button>
       <div id="code-editor">
         <div class="editor" id="inputEditor"></div>
         <div class="editor" id="outputEditor"></div>
