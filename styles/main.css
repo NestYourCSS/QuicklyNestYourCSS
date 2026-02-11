@@ -7,21 +7,21 @@
     --pri-colour-em-darker: #092533;
     --pri-colour-m-darker: #1c4d67;
     --pri-colour-darker: #307aa0;
-    --pri-colour-medium: #4dbaf3;
-    --pri-colour-lighter: #98d7fc;
+    --pri-colour-medium: #00d2ff;
+    --pri-colour-lighter: #80e8ff;
     --pri-colour-lightest: #bde4fc;
 
     --sec-colour-darkest: #00272b;
     --sec-colour-m-darker: #015259;
     --sec-colour-darker: #02818b;
-    --sec-colour-medium: #03c4d4;
+    --sec-colour-medium: #00f2ff;
     --sec-colour-lighter: #8adee7;
     --sec-colour-lightest: #b6e9ee;
 
     --red-colour-darkest: #33191b;
     --red-colour-m-darker: #67383c;
     --red-colour-darker: #a15a60;
-    --red-colour-medium: #f48a94;
+    --red-colour-medium: #ff4d4d;
     --red-colour-lighter: #ffb8bc;
     --red-colour-lightest: #ffd1d3;
 
@@ -55,7 +55,7 @@ html {
 }
 
 #settings-toggle {
-    position: fixed;
+    position: absolute;
     top: 2rem;
     right: 15rem;
     z-index: 1000;
@@ -83,21 +83,21 @@ html {
 }
 
 #settings-popover {
-    position: fixed;
+    position: absolute;
     top: 7rem;
     right: 2rem;
-    z-index: 1000;
+    z-index: 1001;
     background: rgba(10, 10, 10, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 40px;
-    padding: 2.5rem;
-    width: clamp(320px, 90vw, 520px);
+    border-radius: 2rem;
+    padding: 2rem;
+    width: clamp(320px, 90vw, 560px);
     max-height: calc(100vh - 9rem);
     overflow-y: auto;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05) inset;
     color: var(--shades-lightest);
     font-family: 'Poppins', sans-serif;
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(25px) saturate(180%);
 }
 
 #settings-popover::-webkit-scrollbar {
@@ -131,49 +131,48 @@ html {
     margin-top: 0;
     margin-bottom: 2rem;
     color: white;
-    font-size: 1.6rem;
-    font-weight: 700;
+    font-size: 1.25rem;
+    font-weight: 400;
     letter-spacing: -0.02em;
 }
 
 .setting-row {
     margin-bottom: 2rem;
-    display: grid;
-    grid-template-columns: 140px 1fr;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1.5rem;
 }
 
-@media (max-width: 500px) {
-    .setting-row {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-    }
-}
-
 .setting-label {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.5);
-    font-weight: 500;
+    font-size: 1.125rem;
+    color: white;
+    font-weight: 400;
+    flex: 0 0 140px;
+    white-space: nowrap;
 }
 
 .setting-controls {
     display: flex;
     gap: 1rem;
     align-items: center;
+    flex: 0 0 340px;
+    justify-content: flex-end;
 }
 
 .custom-select {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.8);
-    padding: 0.8rem 1.2rem;
-    border-radius: 12px;
+    padding: 0.6rem 1rem;
+    border-radius: 0.75rem;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     flex: 1;
+    min-width: 0;
     transition: background 0.2s;
+    outline: none;
 }
 
 .custom-select.small {
@@ -187,9 +186,11 @@ html {
 .segmented-control {
     display: flex;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 6px;
-    gap: 4px;
+    border-radius: 1rem;
+    padding: 0.25rem;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .segmented-control.wide {
@@ -201,13 +202,16 @@ html {
     background: transparent;
     border: none;
     color: rgba(255, 255, 255, 0.4);
-    padding: 0.8rem 1rem;
-    border-radius: 12px;
+    padding: 0.6rem 0.25rem;
+    border-radius: 0.75rem;
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .segmented-control button.active {
@@ -227,8 +231,8 @@ html {
     align-items: center;
     gap: 0.75rem;
     background: rgba(255, 255, 255, 0.05);
-    padding: 0.6rem 1rem;
-    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
     color: rgba(255, 255, 255, 0.6);
 }
 
@@ -276,9 +280,10 @@ main {
     height: 100%;
     padding: 8rem 2rem 2rem 2rem;
     gap: 2rem;
+    position: relative;
 
     > button {
-        position: fixed;
+        position: absolute;
         top: 2rem;
         right: 2rem;
         z-index: 1000;

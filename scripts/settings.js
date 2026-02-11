@@ -135,7 +135,7 @@
   }
 
   function updateNestButton() {
-    const nestBtn = document.querySelector('#code-editor-wrapper > button');
+    const nestBtn = document.getElementById('nest-btn');
     if (!nestBtn) return;
 
     const modeLabels = {
