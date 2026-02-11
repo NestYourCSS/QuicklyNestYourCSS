@@ -169,12 +169,10 @@
 
     // Reset classes
     nestBtn.classList.remove('vibrant');
-    nestBtn.style.cursor = 'pointer';
 
     if (window.autoProcess) {
         nestBtn.innerText = 'Auto';
         nestBtn.disabled = true;
-        nestBtn.style.cursor = 'not-allowed';
     } else {
         const modeLabels = { '0': 'Minify!', '1': 'Beautify!', '2': 'Denest!', '3': 'Nest!' };
         nestBtn.innerText = modeLabels[settings['mode']] || 'Nest!';

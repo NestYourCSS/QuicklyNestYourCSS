@@ -39,6 +39,10 @@
     --opacity-low: 0.25;
     --opacity-medium: 0.5;
     --opacity-high: 0.75;
+
+    --component-text: color-mix(in srgb, var(--shades-darker), var(--shades-medium));
+    --component-text-hover: var(--shades-medium);
+    --component-background: rgb(from var(--shades-darkest) r g b / 0.25);
 }
 
 * {
@@ -81,7 +85,6 @@ html {
 
     --top-colour: var(--shades-m-darker);
     --bottom-colour: var(--shades-em-darker);
-    --component-background: rgb(from var(--shades-darkest) r g b / 0.25);
 
     background: linear-gradient(to bottom, var(--top-colour), var(--bottom-colour) 45%, transparent 55%) 0% 100% / 100% 210% no-repeat, var(--component-background);
     transition: background-position 0.125s ease-out, transform 0.2s, filter 0.2s;
@@ -93,17 +96,31 @@ html {
     transform: translateY(-2px);
 }
 
+.header-btn:disabled {
+    color: var(--component-text);
+}
+
+.header-btn:disabled:hover {
+    filter: none;
+    transform: none;
+}
+
 .header-btn.vibrant {
     --top-colour: var(--sec-colour-m-darker);
     --bottom-colour: var(--pri-colour-darkest);
     background-position: 0% 0%;
 }
 
+.settings-container {
+    position: relative;
+    display: flex;
+}
+
 #mainSettings {
     position: absolute;
     z-index: 1001;
     top: calc(100% + 2rem); /* 2rem below the buttons */
-    right: -2rem;
+    right: 0;
     width: clamp(320px, 90vw, 560px);
     max-height: calc(100vh - 9rem);
     overflow: hidden auto;
@@ -150,13 +167,10 @@ html {
     display: flex;
     flex-direction: column;
     --component-gap: 0.5rem;
-    --component-background: rgb(from var(--shades-darkest) r g b / 0.25);
     --component-background-selected: linear-gradient(to right, var(--shades-m-darker), var(--shades-em-darker));
     --component-box-shadow: inset 0 1px oklch(100% none none / 0.25), inset 0 -1px rgb(from var(--shades-m-darker) r g b / 0.5);
     --component-box-shadow-selected: inset 0 1px oklch(100% none none / 0.25), inset 0 -1px rgb(from var(--shades-m-darker) r g b / 0.5);
     --component-box-shadow-focused: 0 0 1.5em var(--shades-medium);
-    --component-text: color-mix(in srgb, var(--shades-darker), var(--shades-medium));
-    --component-text-hover: var(--shades-medium);
     gap: var(--component-gap);
 }
 

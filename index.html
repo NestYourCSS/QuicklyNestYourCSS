@@ -22,11 +22,12 @@
 <body>
   <div class="header-controls">
     <button id="nest-btn" class="header-btn">Nest!</button>
-    <button id="settings-toggle" class="header-btn vibrant" title="Settings">
-      <i class="ph ph-gear-six"></i>
-    </button>
+    <div class="settings-container">
+      <button id="settings-toggle" class="header-btn vibrant" title="Settings">
+        <i class="ph ph-gear-six"></i>
+      </button>
 
-    <aside id="mainSettings" class="hidden">
+      <aside id="mainSettings" class="hidden">
         <section>
           <h2>Editor</h2>
           <ul>
@@ -141,7 +142,8 @@
             </li>
           </ul>
         </section>
-    </aside>
+      </aside>
+    </div>
   </div>
   <main>
     <div id="code-editor-wrapper">
