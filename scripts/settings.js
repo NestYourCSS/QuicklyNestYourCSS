@@ -138,14 +138,13 @@
         const tab = editor.container.parentElement.querySelector('.editorTab');
         if (!tab) return;
 
-        const coordsEl = tab.querySelector('.editorCoordinates');
-        if (!coordsEl) return;
+        const fileNameEl = tab.querySelector('.fileName');
+        if (!fileNameEl) return;
 
         if (coordsMode === 0) {
-            coordsEl.classList.add('hidden');
+            fileNameEl.removeAttribute('cursor');
         } else {
-            coordsEl.classList.remove('hidden');
-            updateCoordText(editor, coordsEl, coordsMode);
+            updateCoordText(editor, fileNameEl, coordsMode);
         }
     });
   }
@@ -155,9 +154,12 @@
     const line = pos.row + 1;
     const col = pos.column + 1;
 
-    if (mode === 1) el.textContent = line;
-    else if (mode === 2) el.textContent = col;
-    else if (mode === 3) el.textContent = `${line}:${col}`;
+    let text = '';
+    if (mode === 1) text = line;
+    else if (mode === 2) text = col;
+    else if (mode === 3) text = `${line}:${col}`;
+
+    el.setAttribute('cursor', text);
   }
 
   function updateNestButton() {
@@ -271,9 +273,9 @@
       [window.inputEditor, window.outputEditor].forEach(editor => {
           editor.selection.on('changeCursor', () => {
               const tab = editor.container.parentElement.querySelector('.editorTab');
-              const coordsEl = tab?.querySelector('.editorCoordinates');
-              if (coordsEl) {
-                  updateCoordText(editor, coordsEl, parseInt(settings['coords']));
+              const fileNameEl = tab?.querySelector('.fileName');
+              if (fileNameEl && settings['coords'] !== '0') {
+                  updateCoordText(editor, fileNameEl, parseInt(settings['coords']));
               }
           });
       });

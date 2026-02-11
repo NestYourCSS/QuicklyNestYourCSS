@@ -61,7 +61,7 @@ html {
     right: 2rem;
     z-index: 1000;
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
     align-items: center;
 }
 
@@ -81,7 +81,7 @@ html {
 
     --top-colour: var(--shades-m-darker);
     --bottom-colour: var(--shades-em-darker);
-    --component-background: color-mix(in srgb, var(--shades-darkest), #000 75%);
+    --component-background: rgb(from var(--shades-darkest) r g b / 0.25);
 
     background: linear-gradient(to bottom, var(--top-colour), var(--bottom-colour) 45%, transparent 55%) 0% 100% / 100% 210% no-repeat, var(--component-background);
     transition: background-position 0.125s ease-out, transform 0.2s, filter 0.2s;
@@ -90,7 +90,7 @@ html {
 
 .header-btn:hover {
     filter: brightness(1.2);
-    transform: scale(1.05);
+    transform: translateY(-2px);
 }
 
 .header-btn.vibrant {
@@ -100,36 +100,10 @@ html {
 }
 
 #mainSettings {
-    position: fixed;
-    top: calc(2rem + 1.125rem + 2rem + 1rem); /* top + height + 1rem gap. padding is 1rem top/bottom, font is 1.125rem. approx height is 3.125rem? No, padding 1rem = 2rem + 1.125 = 3.125. */
-    /* Let's be more precise if possible, but the button has fixed height approx. */
-    /* top: 2rem (start) + button height + 1rem gap */
-    /* Better: position relative to the container. */
-}
-
-/* Redefine positioning for popover relative to button */
-.header-controls {
-    position: fixed;
-    top: 2rem;
-    right: 2rem;
-    z-index: 1000;
-}
-
-#mainSettings {
-    position: fixed;
+    position: absolute;
     z-index: 1001;
-    /* We will use right: 0 and transform/offset to align content */
-    top: calc(2rem + 3.125rem + 1rem); /* top + button height + 1rem gap */
-    right: 0rem; /* Popover right = screen right */
-    /* Offset logic:
-       Button is 2rem from right.
-       Button width is variable but min 8rem.
-       Popover right should be Button right + 2rem.
-       If Button is 2rem from edge, Popover should be 0rem from edge (since padding is 2rem).
-       Let's check: Popover padding 2rem.
-       If popover right = 0rem, then content right = 2rem.
-       Button right = 2rem. Perfect match.
-    */
+    top: calc(100% + 2rem); /* 2rem below the buttons */
+    right: -2rem;
     width: clamp(320px, 90vw, 560px);
     max-height: calc(100vh - 9rem);
     overflow: hidden auto;
@@ -268,10 +242,9 @@ html {
     padding: 1em;
     gap: 0.5em;
     flex-direction: column;
-    background: color-mix(in srgb, var(--shades-darkest), black 75%);
+    background: rgb(from var(--shades-darkest) r g b / 0.75);
     backdrop-filter: blur(25px);
-    border-bottom-left-radius: 1rem;
-    border-bottom-right-radius: 1rem;
+    border-radius: 1rem;
     box-shadow: 0px 10px 10px 2.5px rgb(from var(--shades-black) r g b / 0.5);
     list-style: none;
 }
@@ -498,15 +471,16 @@ main {
             > .fileName {
                 font-size: 1em;
                 align-content: center;
-            }
 
-            .editorCoordinates {
-                font-size: 0.75em;
-                align-content: center;
-                opacity: 0.6;
-                letter-spacing: 0.05em;
-                text-transform: uppercase;
-                font-weight: 500;
+                &[cursor]::after {
+                    content: attr(cursor);
+                    margin-left: 1ch;
+                    font-size: 0.75em;
+                    opacity: 0.6;
+                    letter-spacing: 0.05em;
+                    text-transform: uppercase;
+                    font-weight: 500;
+                }
             }
 
             > .tabButtons {
@@ -516,8 +490,8 @@ main {
 
                 > button {
                     font-size: inherit;
-                    height: 4em;
-                    width: 4em;
+                    height: 2em;
+                    width: 2em;
                     border: none;
                     border-radius: 50%;
                     background-color: transparent;
