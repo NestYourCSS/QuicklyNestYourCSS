@@ -98,6 +98,7 @@ html {
 
 .header-btn:disabled {
     color: var(--component-text);
+    cursor: not-allowed;
 }
 
 .header-btn:disabled:hover {
@@ -145,12 +146,21 @@ html {
 
 #mainSettings > section {
     border-radius: 2rem;
-    backdrop-filter: blur(25px) saturate(100%) brightness(1.5);
     padding: 2rem;
     display: flex;
+    position: relative;
     flex-direction: column;
     gap: 2rem;
     box-shadow: 0 0 4px 2px rgba(255, 255, 255, 0.05) inset;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        backdrop-filter: blur(25px) saturate(100%) brightness(1.5);
+        z-index: -1;
+    }
 }
 
 #mainSettings > section > h2 {
@@ -227,6 +237,10 @@ html {
 
 #mainSettings .dropdown:focus-within > input:checked + output {
     border-radius: 1rem 1rem 0 0;
+}
+
+#mainSettings .dropdown:focus-within > input:checked ~ ul {
+    border-radius: 0 0 1rem 1rem;
 }
 
 #mainSettings .dropdown > output {
@@ -393,10 +407,9 @@ html {
 #mainSettings .radio-group > label:has(:checked) {
     box-shadow: var(--component-box-shadow-selected);
     background-position: 0% 0%;
-    color: var(--shades-lightest);
 }
 
-#mainSettings .radio-group > label:not(:has(:checked)):hover {
+#mainSettings .radio-group > label:hover {
     color: var(--component-text-hover);
 }
 
