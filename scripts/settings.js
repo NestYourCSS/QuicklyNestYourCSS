@@ -163,9 +163,9 @@
     const col = pos.column + 1;
 
     let text = '';
-    if (mode === 1) text = line;
-    else if (mode === 2) text = col;
-    else if (mode === 3) text = `${line}:${col}`;
+    if (mode === 1) text = ` | Ln ${line}`;
+    else if (mode === 2) text = ` | Col ${col}`;
+    else if (mode === 3) text = ` | Ln ${line}, Col ${col}`;
 
     el.setAttribute('cursor', text);
   }

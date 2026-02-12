@@ -511,12 +511,8 @@ main {
 
                 &[cursor]::after {
                     content: attr(cursor);
-                    margin-left: 1ch;
                     font-size: 0.75em;
                     opacity: 0.6;
-                    letter-spacing: 0.05em;
-                    text-transform: uppercase;
-                    font-weight: 500;
                 }
             }
 
