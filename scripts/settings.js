@@ -5,6 +5,8 @@
   // Toggle popover
   toggleBtn.addEventListener('click', (e) => {
     popover.classList.toggle('hidden');
+    // Close all dropdowns when opening/closing main settings
+    document.querySelectorAll('.dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
     e.stopPropagation();
   });
 
@@ -15,7 +17,13 @@
 
     // Close dropdowns when clicking outside
     if (!e.target.closest('.dropdown')) {
-        document.querySelectorAll('.dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.dropdown input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+            const output = cb.nextElementSibling;
+            if (output && output.tagName === 'OUTPUT') {
+                output.setAttribute('aria-expanded', 'false');
+            }
+        });
     }
   });
 
@@ -184,6 +192,27 @@
   // Event Listeners
 
   // Font Dropdown
+  // Close other dropdowns when one is opened
+  document.querySelectorAll('.dropdown input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+          const output = e.target.nextElementSibling;
+          if (output && output.tagName === 'OUTPUT') {
+              output.setAttribute('aria-expanded', e.target.checked);
+          }
+          if (e.target.checked) {
+              document.querySelectorAll('.dropdown input[type="checkbox"]').forEach(other => {
+                  if (other !== e.target) {
+                      other.checked = false;
+                      const otherOutput = other.nextElementSibling;
+                      if (otherOutput && otherOutput.tagName === 'OUTPUT') {
+                          otherOutput.setAttribute('aria-expanded', 'false');
+                      }
+                  }
+              });
+          }
+      });
+  });
+
   document.querySelectorAll('#typefaces-listbox li').forEach(li => {
       li.addEventListener('click', () => {
           const fontMap = {
@@ -193,7 +222,9 @@
               "PT Mono": "'PT Mono', monospace"
           };
           const val = fontMap[li.textContent] || "'Fira Code', monospace";
-          document.querySelector('#typefaces output').textContent = li.textContent;
+          const output = document.querySelector('#typefaces output');
+          output.textContent = li.textContent;
+          output.setAttribute('aria-expanded', 'false');
           document.getElementById('typefaces-checkbox').checked = false;
           updateSetting('font', val);
       });
@@ -202,7 +233,9 @@
   // Font Size Dropdown
   document.querySelectorAll('#fontsizes-listbox li').forEach(li => {
       li.addEventListener('click', () => {
-          document.querySelector('#fontsizes output').textContent = li.textContent;
+          const output = document.querySelector('#fontsizes output');
+          output.textContent = li.textContent;
+          output.setAttribute('aria-expanded', 'false');
           document.getElementById('fontsizes-checkbox').checked = false;
           updateSetting('fontsize', li.textContent);
       });
@@ -218,14 +251,43 @@
   indentInput.addEventListener('input', (e) => {
       updateSetting('indent-size', e.target.value);
   });
-  document.getElementById('indent-up').addEventListener('click', () => {
-      indentInput.value = parseInt(indentInput.value) + 1;
-      updateSetting('indent-size', indentInput.value);
-  });
-  document.getElementById('indent-down').addEventListener('click', () => {
-      indentInput.value = Math.max(1, parseInt(indentInput.value) - 1);
-      updateSetting('indent-size', indentInput.value);
-  });
+
+  const changeIndentSize = (delta) => {
+    const val = parseInt(indentInput.value) || 0;
+    indentInput.value = Math.max(1, val + delta);
+    updateSetting('indent-size', indentInput.value);
+  };
+
+  const setupAutoRepeat = (btn, delta) => {
+    let interval;
+    let timeout;
+
+    const start = () => {
+        changeIndentSize(delta);
+        timeout = setTimeout(() => {
+            interval = setInterval(() => changeIndentSize(delta), 100);
+        }, 500);
+    };
+
+    const stop = () => {
+        clearTimeout(timeout);
+        clearInterval(interval);
+    };
+
+    btn.addEventListener('mousedown', (e) => {
+        if (e.button === 0) start();
+    });
+    btn.addEventListener('mouseup', stop);
+    btn.addEventListener('mouseleave', stop);
+    btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        start();
+    }, { passive: false });
+    btn.addEventListener('touchend', stop);
+  };
+
+  setupAutoRepeat(document.getElementById('indent-up'), 1);
+  setupAutoRepeat(document.getElementById('indent-down'), -1);
 
   // Word Wrap
   document.getElementById('word-wrap-checkbox').addEventListener('change', (e) => {

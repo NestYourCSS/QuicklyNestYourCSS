@@ -256,7 +256,7 @@ html {
     padding: 1em;
     gap: 0.5em;
     flex-direction: column;
-    background: rgb(from var(--shades-darkest) r g b / 0.75);
+    background: rgb(from color-mix(in srgb, var(--shades-darkest), var(--pri-colour-darkest) 75%) r g b / 0.75);
     backdrop-filter: blur(25px);
     border-radius: 1rem;
     box-shadow: 0px 10px 10px 2.5px rgb(from var(--shades-black) r g b / 0.5);
@@ -302,6 +302,16 @@ html {
     width: 3ch;
     text-align: center;
     outline: none;
+}
+
+#mainSettings .number > output > input::-webkit-outer-spin-button,
+#mainSettings .number > output > input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0;
+}
+
+#mainSettings .number > output > input[type=number] {
+  -moz-appearance: textfield !important;
 }
 
 #mainSettings .number > output > div {
@@ -386,7 +396,7 @@ html {
     color: var(--shades-lightest);
 }
 
-#mainSettings .radio-group > label:hover {
+#mainSettings .radio-group > label:not(:has(:checked)):hover {
     color: var(--component-text-hover);
 }
 
