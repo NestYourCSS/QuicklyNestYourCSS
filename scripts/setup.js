@@ -22,7 +22,7 @@ h1 {
 }
   `;
   sample = Object.values(cssSamples)[0]; // First one
-  // sample = Object.values(cssSamples)[0]; // Specific one 
+  // sample = Object.values(cssSamples)[0]; // Specific one
   // sample = cssSamples["hopefullyTheEnd"]; // Specific one
   // sample = Object.values(cssSamples).slice(0, 2).join(''); // Range
   // sample = Object.values(cssSamples).join(''); // All - It would be stupid to do this
@@ -45,7 +45,7 @@ h1 {
       isProcessing = true;
 
       setTimeout(() => {
-        if (codeChanged) {
+        if (codeChanged && window.autoProcess !== false) {
           nestCode();
           codeChanged = false;
         }
@@ -69,7 +69,7 @@ h1 {
     const editorTab = createEditorTab(editor.container, isInputEditor, false);
     wrapEditorWithGroup(editor.container, editorTab);
   });
-        
+
   function createButton(idSuffix, className, isShadowEditor) {
     const button = document.createElement("button");
     button.id = idSuffix;
@@ -87,6 +87,7 @@ h1 {
     const fileName = document.createElement("div");
     fileName.classList.add('fileName');
     fileName.textContent = `${editorName}.css`;
+    fileName.setAttribute('cursor', '1:1');
 
     const tabButtons = document.createElement("div");
     tabButtons.classList.add('tabButtons');
@@ -111,10 +112,10 @@ h1 {
 
         // Add event listeners for drag-and-drop functionality
         setupDragAndDrop(editor);
-        
+
         window.insertCSSFileInput = fileInput;
       }
-      
+
       tabButtons.appendChild(createButton(`${editorName}TabInsertCSS`, 'tabInsertCSS', isShadowEditor));
     } else {
       tabButtons.appendChild(createButton(`${editorName}TabOpenRaw`, 'tabOpenRaw', isShadowEditor));

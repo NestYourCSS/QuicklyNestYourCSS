@@ -26,7 +26,7 @@ function tabButtonHandler(e) {
               ">
 
                 <pre style="
-                background: url(../assets/images/nycss-bg-pattern.png) 0 0.1dvh / 5dvh repeat, linear-gradient(to right, #121212, #092533);
+                background: url('assets/nycss-bg-pattern.png') 0 0.1dvh / 5dvh repeat, linear-gradient(to right, #121212, #092533);
                   margin: 0;
                   padding: 2rem;
                   overflow: auto;
