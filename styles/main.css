@@ -2,6 +2,8 @@
 
 :root {
     --rem: clamp(0px, 1.5vh, 24px);
+    --header-top: 2rem;
+    --margin-gap: 1rem;
 
     --pri-colour-darkest: #051823;
     --pri-colour-em-darker: #092533;
@@ -61,12 +63,19 @@ html {
 
 .header-controls {
     position: fixed;
-    top: 2rem;
-    right: 2rem;
+    top: var(--header-top);
+    right: var(--header-top);
     z-index: 1000;
     display: flex;
     gap: 1rem;
     align-items: center;
+
+    @media (width < 1024px) {
+        left: var(--margin-gap);
+        right: var(--margin-gap);
+        width: auto;
+        justify-content: center;
+    }
 }
 
 .header-btn {
@@ -89,6 +98,11 @@ html {
     background: linear-gradient(to bottom, var(--top-colour), var(--bottom-colour) 45%, transparent 55%) 0% 100% / 100% 210% no-repeat, var(--component-background);
     transition: background-position 0.125s ease-out, transform 0.2s, filter 0.2s;
     background-position: 0% 100%;
+
+    @media (width < 1024px) {
+        min-width: unset;
+        flex: 1;
+    }
 }
 
 .header-btn:hover {
@@ -115,12 +129,16 @@ html {
 .settings-container {
     position: relative;
     display: flex;
+
+    @media (width < 1024px) {
+        position: static;
+    }
 }
 
 #mainSettings {
     position: absolute;
     z-index: 1001;
-    top: calc(100% + 2rem); /* 2rem below the buttons */
+    top: calc(100% + var(--header-top)); /* dynamic gap below the buttons */
     right: 0;
     width: clamp(320px, 90vw, 560px);
     max-height: calc(100vh - 9rem);
@@ -134,6 +152,19 @@ html {
     border-radius: 4rem;
     scrollbar-width: none; /* Hide scrollbar */
     -ms-overflow-style: none; /* IE and Edge */
+
+    @media (width < 1024px) {
+        left: 0;
+        right: 0;
+        width: 100%;
+        top: calc(100% + var(--margin-gap));
+        bottom: calc(100% + var(--header-top) + var(--margin-gap) - 100vh);
+        max-height: none;
+        box-sizing: border-box;
+        border-radius: 2rem;
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
 }
 
 #mainSettings::-webkit-scrollbar {
@@ -152,6 +183,11 @@ html {
     flex-direction: column;
     gap: 2rem;
     box-shadow: 0 0 4px 2px rgba(255, 255, 255, 0.05) inset;
+
+    @media (width < 1024px) {
+        padding: 1.25rem;
+        gap: 1.25rem;
+    }
 
     &::before {
         content: '';
@@ -188,6 +224,13 @@ html {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     align-items: center;
+
+    @media (width < 1024px) {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 }
 
 #mainSettings > section > ul > li > span {
@@ -196,6 +239,10 @@ html {
     font-size: 1.125rem;
     font-weight: 300;
     color: var(--component-text);
+
+    @media (width < 1024px) {
+        font-size: 1rem;
+    }
 }
 
 #mainSettings > section > ul > li > div {
@@ -206,6 +253,10 @@ html {
     gap: var(--component-gap);
     color: var(--component-text);
     font-size: 1rem;
+
+    @media (width < 1024px) {
+        width: 100%;
+    }
 }
 
 #mainSettings .dropdown {
@@ -442,22 +493,8 @@ main {
     gap: 2rem;
     position: relative;
 
-    @media (max-width: 800px) {
+    @media (width < 1024px) {
         padding-top: 7rem;
-
-        #settings-toggle {
-            right: 12rem;
-            width: 3.5rem;
-            height: 3.5rem;
-            font-size: 1.2rem;
-        }
-
-        > button {
-            right: 1rem;
-            padding: 0 1.5rem;
-            font-size: 1.4rem;
-            height: 3.5rem;
-        }
     }
 
     > #code-editor {
@@ -470,7 +507,7 @@ main {
         display: flex;
         gap: calc((var(--gutter-width) / var(--total-width)) * 100%);
 
-        @media (width < 896px) {
+        @media (width < 1024px) {
             display: grid;
         }
 
