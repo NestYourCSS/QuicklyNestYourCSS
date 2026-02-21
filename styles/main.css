@@ -159,7 +159,7 @@ html {
         box-sizing: border-box;
         border-radius: 2rem;
         padding: 0;
-        background: rgb(from #000 r g b / 0.75);
+        background: none;
     }
 }
 
@@ -183,7 +183,7 @@ html {
     @media (width < 1024px) {
         padding: 1.25rem;
         gap: 1.25rem;
-        background: rgb(from var(--pri-colour-darkest) r g b / 0.25);
+        background: rgb(from var(--pri-colour-darkest) r g b / 0.5);
     }
 
     &::before {
