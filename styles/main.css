@@ -99,10 +99,6 @@ html {
     transition: background-position 0.125s ease-out, transform 0.2s, filter 0.2s;
     background-position: 0% 100%;
 
-    @media (width < 1024px) {
-        min-width: unset;
-        flex: 1;
-    }
 }
 
 .header-btn:hover {
@@ -162,8 +158,8 @@ html {
         max-height: none;
         box-sizing: border-box;
         border-radius: 2rem;
-        padding: 1.5rem;
-        gap: 1.5rem;
+        padding: 0;
+        background: rgb(from #000 r g b / 0.75);
     }
 }
 
@@ -187,6 +183,7 @@ html {
     @media (width < 1024px) {
         padding: 1.25rem;
         gap: 1.25rem;
+        background: rgb(from var(--pri-colour-darkest) r g b / 0.25);
     }
 
     &::before {
