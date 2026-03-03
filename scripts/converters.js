@@ -698,6 +698,8 @@ function stringifySelectorForIs(groups) {
  * @returns {SelectorGroup[]} The new, combined selector groups.
  */
 function combineSelectors(parentGroups, childGroups) {
+    const combinators = ['>', '+', '~'];
+
     if (!parentGroups || parentGroups.length === 0) {
         // Handle top-level '&', which represents the scoping root, e.g., :root or a shadow host.
         // For simplicity in a general context, we can treat it like :root.
@@ -724,8 +726,10 @@ function combineSelectors(parentGroups, childGroups) {
             // Rule: No '&' implies a descendant selector.
             // .parent { .child {} } -> .parent .child {}
             const parentParts = parentIsList ? [`:is(${parentReplacementStr})`] : parentGroups[0].parts;
+            const childStartsWithCombinator = combinators.includes(childGroup.parts[0]);
+
             const newGroup = {
-                parts: [...parentParts, ' ', ...childGroup.parts],
+                parts: childStartsWithCombinator ? [...parentParts, ...childGroup.parts] : [...parentParts, ' ', ...childGroup.parts],
                 newlinesBefore: 0,
                 commentAfter: childGroup.commentAfter
             };
