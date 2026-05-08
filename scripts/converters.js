@@ -421,6 +421,14 @@ function minifyValue(tokens) {
         else if (lastCharPrev === ')' && /[a-zA-Z0-9]/.test(firstCharToken)) {
             spaceNeeded = true;
         }
+
+        // Case 3: A space is needed between a digit and a token starting with '.'
+        // to prevent merging into a single number.
+        // e.g; "0" and ".9rem" -> "0 .9rem" (not "0.9rem")
+        // e.g; "0" and ".5px" -> "0 .5px" (not "0.5px")
+        else if (/[0-9]/.test(lastCharPrev) && firstCharToken === '.') {
+            spaceNeeded = true;
+        }
         
         // In all other cases, no space is needed. This correctly handles:
         // - Joining `!` and `important`: `!` is not alphanumeric.
