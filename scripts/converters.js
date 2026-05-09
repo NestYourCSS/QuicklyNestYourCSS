@@ -429,6 +429,33 @@ function minifyValue(tokens) {
         else if (/[0-9]/.test(lastCharPrev) && firstCharToken === '.') {
             spaceNeeded = true;
         }
+
+        // Case 4: A space is needed between a token ending with a letter (unit) 
+        // and a token starting with '.' to prevent unit fusion.
+        // e.g; ".1em" and ".2em" -> ".1em .2em" (not ".1em.2em")
+        // e.g; "1px" and ".5em" -> "1px .5em" (not "1px.5em")
+        else if (/[a-zA-Z%]/.test(lastCharPrev) && firstCharToken === '.') {
+            spaceNeeded = true;
+        }
+
+        // Case 5: A space is needed between a digit/unit and a negative number
+        // to prevent fusion with subtraction operator.
+        // e.g; "0" and "-.5em" -> "0 -.5em" (not "0-.5em")
+        // e.g; "1em" and "-2em" -> "1em -2em" (not "1em-2em")
+        else if ((/[0-9a-zA-Z%]/.test(lastCharPrev) || lastCharPrev === ')') && 
+                 firstCharToken === '-' && 
+                 token.length > 1 && 
+                 /[0-9.]/.test(token[1])) {
+            spaceNeeded = true;
+        }
+
+        // Case 6: A space is needed between a percentage and a number/unit
+        // to prevent values from merging.
+        // e.g; "50%" and "50%" -> "50% 50%" (not "50%50%")
+        // e.g; "100%" and "1em" -> "100% 1em" (not "100%1em")
+        else if (lastCharPrev === '%' && /[a-zA-Z0-9.]/.test(firstCharToken)) {
+            spaceNeeded = true;
+        }
         
         // In all other cases, no space is needed. This correctly handles:
         // - Joining `!` and `important`: `!` is not alphanumeric.
