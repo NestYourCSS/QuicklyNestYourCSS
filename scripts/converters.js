@@ -396,11 +396,18 @@ function minifyValue(tokens) {
         return '';
     }
 
-    let result = tokens[0];
+    // Compress spaces after commas inside function tokens (e.g., rgb(255, 0, 0) -> rgb(255,0,0))
+    const compressToken = (token) => {
+        // Remove spaces after commas inside parentheses: "rgb(255, 0, 0)" -> "rgb(255,0,0)"
+        // Match comma followed by whitespace inside function calls
+        return token.replace(/,(\s+)/g, ',');
+    };
+
+    let result = compressToken(tokens[0]);
 
     for (let i = 1; i < tokens.length; i++) {
         const prevToken = tokens[i - 1];
-        const token = tokens[i];
+        const token = compressToken(tokens[i]);
 
         const lastCharPrev = prevToken.slice(-1);
         const firstCharToken = token[0];
